@@ -10,7 +10,8 @@ class Map:
     zoomed_tile_size = TILE_SIZE
     grid_d_size = TILE_SIZE
 
-    wmap = []
+    tile_map = []
+    object_map = []
 
     offset_pos = (0, 0)
 
@@ -18,13 +19,20 @@ class Map:
 
     FILE = "D:/JavaProgs/Mockmon/src/main/resources/map.json"
 
-    def __init__(self, tm):
+    def __init__(self, tm, om):
         self.tile_manager = tm
+        self.object_manager = om
         self.drawable_tiles = []
+        self.drawable_objects = []
         for tile in self.tile_manager.tiles:
             t = DrawableTile(tile.image)
             t.resize(self.zoomed_tile_size)
             self.drawable_tiles.append(t)
+
+        for obj in self.object_manager.objects:
+            t = DrawableObject(obj.image)
+            t.resize(self.zoomed_tile_size/self.TILE_SIZE)
+            self.drawable_objects.append(t)
 
         self.load()
 
@@ -48,13 +56,13 @@ class Map:
                 else:
                     return o
 
-        self.wmap = json.loads(line, cls=MapDecoder)
+        self.tile_map = json.loads(line, cls=MapDecoder)
 
     def save(self):
-        nmap = self.wmap
-        max_len = max([len(l) for l in self.wmap])
+        nmap = self.tile_map
+        max_len = max([len(l) for l in self.tile_map])
 
-        for y in self.wmap:
+        for y in self.tile_map:
             for _ in range(max_len - len(y)):
                 y.append(0)
 
@@ -77,24 +85,48 @@ class Map:
         ys = int(math.floor((pos[1]+self.offset_pos[1]) / self.zoomed_tile_size))
 
         while ys-pen_size_off < 0:
-            self.wmap = [[]] + self.wmap
+            self.tile_map = [[]] + self.tile_map
             self.offset_pos = (self.offset_pos[0], self.offset_pos[1] + self.zoomed_tile_size)
             ys += 1
 
         while xs-pen_size_off < 0:
-            for y2 in range(len(self.wmap)):
-                self.wmap[y2] = [0] + self.wmap[y2]
+            for y2 in range(len(self.tile_map)):
+                self.tile_map[y2] = [0] + self.tile_map[y2]
             self.offset_pos = (self.offset_pos[0] + self.zoomed_tile_size, self.offset_pos[1])
             xs += 1
 
         for x in range(xs-pen_size_off, xs+pen_size_off+1):
             for y in range(ys-pen_size_off, ys+pen_size_off+1):
-                while y > len(self.wmap) - 1:
-                    self.wmap.append([])
-                while x > len(self.wmap[y]) - 1:
-                    self.wmap[y].append(0)
+                while y > len(self.tile_map) - 1:
+                    self.tile_map.append([])
+                while x > len(self.tile_map[y]) - 1:
+                    self.tile_map[y].append(-1)
 
-                self.wmap[y][x] = tile_i
+                self.tile_map[y][x] = tile_i
+
+    def set_object(self, pos, object_i):
+        if object_i is None:
+            return
+        x = int(math.floor((pos[0] + self.offset_pos[0]) / self.zoomed_tile_size))
+        y = int(math.floor((pos[1] + self.offset_pos[1]) / self.zoomed_tile_size))
+
+        while y < 0:
+            self.object_map = [[]] + self.object_map
+            self.offset_pos = (self.offset_pos[0], self.offset_pos[1] + self.zoomed_tile_size)
+            y += 1
+
+        while x < 0:
+            for y2 in range(len(self.object_map)):
+                self.object_map[y2] = [0] + self.object_map[y2]
+            self.offset_pos = (self.offset_pos[0] + self.zoomed_tile_size, self.offset_pos[1])
+            x += 1
+
+        while y > len(self.object_map) - 1:
+            self.object_map.append([])
+        while x > len(self.object_map[y]) - 1:
+            self.object_map[y].append(-1)
+
+        self.object_map[y][x] = object_i
 
     def add_offset(self, x, y):
         self.offset_pos = (x, y)
@@ -111,16 +143,27 @@ class Map:
         for tile in self.drawable_tiles:
             tile.resize(self.zoomed_tile_size)
 
+        for obj in self.drawable_objects:
+            obj.resize(self.zoomed_tile_size/self.TILE_SIZE)
+
     def toggle_grid(self):
         self.show_grid = not self.show_grid
 
     def render(self, screen):
         screen.fill((0, 0, 0))
 
-        for y in range(len(self.wmap)):
-            for x in range(len(self.wmap[y])):
-                if self.wmap[y][x] != -1:
-                    self.drawable_tiles[self.wmap[y][x]]\
+        for y in range(len(self.tile_map)):
+            for x in range(len(self.tile_map[y])):
+                if self.tile_map[y][x] != -1:
+                    self.drawable_tiles[self.tile_map[y][x]]\
+                        .draw(screen,
+                              (x * self.zoomed_tile_size) - self.offset_pos[0],
+                              (y * self.zoomed_tile_size) - self.offset_pos[1])
+
+        for y in range(len(self.object_map)):
+            for x in range(len(self.object_map[y])):
+                if self.object_map[y][x] != -1:
+                    self.drawable_objects[self.object_map[y][x]]\
                         .draw(screen,
                               (x * self.zoomed_tile_size) - self.offset_pos[0],
                               (y * self.zoomed_tile_size) - self.offset_pos[1])
@@ -144,6 +187,20 @@ class DrawableTile:
 
     def resize(self, new_size):
         self.image = pygame.transform.scale(self.original_image, (new_size, new_size))
+
+    def draw(self, screen, x, y):
+        rect = self.image.get_rect(topleft=(x, y))
+        screen.blit(self.image, rect)
+
+
+class DrawableObject:
+    def __init__(self, image):
+        self.original_image = image
+        self.image = self.original_image.copy()
+
+    def resize(self, scale):
+        self.image = pygame.transform.scale(
+            self.original_image, (int(self.original_image.get_width()*scale), int(self.original_image.get_height()*scale)))
 
     def draw(self, screen, x, y):
         rect = self.image.get_rect(topleft=(x, y))

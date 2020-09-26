@@ -45,7 +45,7 @@ class Button(pygame.sprite.Sprite):
         text_surf = self.font.render(self.text, True, self.text_color)
         text_rect = text_surf.get_rect(center=image_center)
         # original
-        self.image_normal, self.image_hover, self.image_down =\
+        self.image_normal, self.image_hover, self.image_down = \
             self.image_normal_o.copy(), self.image_hover_o.copy(), self.image_down_o.copy()
         # Blit the text onto the images.
         for image in (self.image_normal, self.image_hover, self.image_down):
@@ -54,7 +54,7 @@ class Button(pygame.sprite.Sprite):
         if set_active_image:
             self.image = self.image_normal
 
-    def __init__(self, x, y, width, height, callback=lambda: next,
+    def __init__(self, x, y, width, height, callback=lambda: None,
                  font=FONT, text='', text_color=(0, 0, 0),
                  image_normal=IMAGE_NORMAL, image_hover=IMAGE_HOVER,
                  image_down=IMAGE_DOWN, fit_text=False, center=False):
@@ -119,3 +119,87 @@ class Button(pygame.sprite.Sprite):
             screen.blit(self.image_down, self.rect)
         else:
             screen.blit(self.image, self.rect)
+
+
+class GuiContainer:
+    min_scroll = 10
+    scroll_offset = 0
+    OBJ_MARGIN = 8
+    max_scroll = 0
+
+    def deselect_all(self):
+        for obj in self.objects:
+            obj.selected = False
+
+    def click_obj(self, x):
+        self.deselect_all()
+        self.objects[x].selected = True
+        self.callback(x)
+
+    def __init__(self, objects, objects_size=(32, 32), callback=(lambda x=None: None),
+                 rect=(0, 0, 100, 100), with_columns=True):
+        self.with_columns = with_columns
+        self.objects_size = objects_size
+        self.rect = rect
+        self.callback = callback
+        self.cont = Button(0, 0, 100, 100)
+        self.objects = []
+        for i in range(len(objects)):
+            self.objects.append(Button(0, 0, objects_size[0], objects_size[1],
+                                       image_normal=objects[i].image,
+                                       image_down=objects[i].image_down,
+                                       image_hover=objects[i].image_hover,
+                                       callback=(lambda x=i: self.click_obj(x))))
+        self.rebuild()
+
+    def hits(self, pos):
+        return self.rect[0] <= pos[0] <= self.rect[2] and self.rect[1] <= pos[1] <= self.rect[3]
+
+    def set_rect(self, x, y, w, h):
+        self.rect = (x, y, w, h)
+        self.rebuild()
+
+    def rebuild(self):
+
+        if self.with_columns:
+            cols = max(1, int((self.rect[2] - self.rect[0] - int(self.OBJ_MARGIN / 2))
+                              / (self.objects_size[1] + self.OBJ_MARGIN)))
+        else:
+            cols = 1
+
+        self.cont.set_rect(self.rect[0], self.rect[1], self.rect[2] - self.rect[0], self.rect[3] - self.rect[1])
+
+        self.max_scroll = (int(len(self.objects) / cols) + 1) * (self.objects_size[1] + self.OBJ_MARGIN) - (self.rect[3] - self.rect[1])
+
+        for i in range(len(self.objects)):
+            self.objects[i].move(
+                self.rect[0] + self.OBJ_MARGIN + ((self.objects_size[0] + self.OBJ_MARGIN) * (i % cols)),
+                self.rect[1] + self.scroll_offset + int(i / cols) * (self.objects_size[1] + self.OBJ_MARGIN))
+
+    def reset_scroll(self):
+        self.scroll_offset = self.min_scroll
+        self.rebuild()
+
+    def handle_scroll(self, event):
+        if not self.hits(event.pos):
+            return False
+
+        if event.button == 4:
+            self.scroll_offset += 10
+            if self.scroll_offset > self.min_scroll:
+                self.scroll_offset = self.min_scroll
+            self.rebuild()
+        elif event.button == 5:
+            if self.scroll_offset > -self.max_scroll:
+                self.scroll_offset -= 10
+                self.rebuild()
+        return True
+
+    def handle_event(self, event):
+        for obj in self.objects:
+            obj.handle_event(event)
+
+    def draw(self, screen):
+        self.cont.draw(screen)
+        for obj in self.objects:
+            obj.draw(screen)
