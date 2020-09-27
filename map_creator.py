@@ -1,23 +1,24 @@
 import pygame
-
-from map import Map
-from object_manager import ObjectManager
-from tile_manager import TileManager
-
-from gui import Gui
+import os
 
 pygame.init()
+
+from lib.map import Map
+from lib.object_manager import ObjectManager
+from lib.tile_manager import TileManager
+
+from lib.gui import Gui
+
+PATH = "D:/JavaProgs/Mockmon/src/main/resources/"
 
 screen = pygame.display.set_mode((640, 480), pygame.RESIZABLE)
 
 clock = pygame.time.Clock()
 
-PATH = "D:/JavaProgs/Mockmon/src/main/resources/"
+tm = TileManager(os.path.join(PATH, "tiles"))
+om = ObjectManager(os.path.join(PATH, "objects"))
 
-tm = TileManager(PATH+"/tiles")
-om = ObjectManager(PATH+"/objects")
-
-ma = Map(tm, om, PATH+"/world.json")
+ma = Map(tm, om, os.path.join(PATH, "world.json"))
 
 g = Gui(tm, om, ma)
 g.rebuild_scene(640, 480)
