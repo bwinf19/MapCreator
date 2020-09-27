@@ -14,9 +14,6 @@ class Map:
 
     object_map = []
 
-    map_surface_original = None
-    map_surface = None
-
     temp_object = -1
     temp_object_pos = (0, 0)
 
@@ -62,7 +59,6 @@ class Map:
             self.drawable_objects.append(t)
 
         self.load()
-        self.build_drawable_map()
 
     def load(self):
 
@@ -126,32 +122,6 @@ class Map:
                 self.object_map[y2] = [-1] + self.object_map[y2]
             self.offset_pos = (self.offset_pos[0] + self.zoomed_tile_size, self.offset_pos[1])
             x += 1
-
-    def build_drawable_map(self, rebuild=False):
-        grid_height = max(len(self.tile_map), len(self.object_map))
-        grid_width = max([0] + [len(l) for l in self.tile_map] + [len(l) for l in self.object_map])
-
-        if rebuild or self.map_surface_original is None:
-            height = grid_height * self.TILE_SIZE
-            width = grid_width * self.TILE_SIZE
-
-            self.map_surface_original = pygame.Surface((width, height))
-            for y in range(len(self.tile_map)):
-                for x in range(len(self.tile_map[y])):
-                    if self.tile_map[y][x] != -1:
-                        pos = (x*self.TILE_SIZE, y*self.TILE_SIZE)
-                        self.drawable_tiles[self.tile_map[y][x]].draw_original(self.map_surface_original, pos[0], pos[1])
-
-            for y in range(len(self.object_map)):
-                for x in range(len(self.object_map[y])):
-                    if self.object_map[y][x] != -1:
-                        pos = (x * self.TILE_SIZE, y * self.TILE_SIZE)
-                        self.drawable_objects[self.object_map[y][x]].draw_original(self.map_surface_original, pos[0], pos[1])
-
-        height = grid_height * self.zoomed_tile_size
-        width = grid_height * self.zoomed_tile_size
-
-        self.map_surface = pygame.transform.scale(self.map_surface_original, (width, height))
 
     def set_tile(self, pos, tile_i, pen_size=1):
         if tile_i is None:
