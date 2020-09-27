@@ -210,9 +210,11 @@ class Map:
                     try:
                         oi = self.object_map[ya][xa]
                         if oi != -1:
-                            self.drawable_objects[oi].draw(screen, x, y)
+                            pos = self.ungrid_pos(self.grid_object((x, y), oi))
+                            self.drawable_objects[oi].draw(screen, pos[0], pos[1])
                         if self.temp_object != -1 and (xa, ya) == temp_obj_grid_pos:
-                            self.drawable_objects[self.temp_object].draw(screen, x, y)
+                            pos = self.ungrid_pos(self.grid_object((x, y), self.temp_object))
+                            self.drawable_objects[self.temp_object].draw(screen, pos[0], pos[1])
                             drawn_temp_obj = True
                     except IndexError:
                         pass
