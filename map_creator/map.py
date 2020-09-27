@@ -165,7 +165,7 @@ class Map:
     def zoom(self, x):
         self.offset_pos = (self.offset_pos[0]/self.zoomed_tile_size, self.offset_pos[1]/self.zoomed_tile_size)
 
-        self.zoomed_tile_size = max(1, self.zoomed_tile_size+x)
+        self.zoomed_tile_size = max(4, self.zoomed_tile_size+x)
 
         self.grid_d_size = self.zoomed_tile_size
 
@@ -183,25 +183,41 @@ class Map:
     def render(self, screen):
         screen.fill((0, 0, 0))
 
-        for y in range(len(self.tile_map)):
-            for x in range(len(self.tile_map[y])):
-                if self.tile_map[y][x] != -1:
-                    pos = self.ungrid_pos((x, y))
-                    self.drawable_tiles[self.tile_map[y][x]]\
-                        .draw(screen, pos[0], pos[1])
+        y = -(self.offset_pos[1] % self.zoomed_tile_size)
+        while y < screen.get_height():
+            x = -(self.offset_pos[0] % self.zoomed_tile_size)
+            while x < screen.get_width():
+                xa, ya = self.grid_pos((x, y))
+                if 0 <= xa and 0 <= ya:
+                    try:
+                        ti = self.tile_map[ya][xa]
+                        if ti != -1:
+                            self.drawable_tiles[ti].draw(screen, x, y)
+                    except IndexError:
+                        pass
+                x += self.zoomed_tile_size
+            y += self.zoomed_tile_size
 
         temp_obj_grid_pos = self.grid_pos(self.temp_object_pos)
         drawn_temp_obj = False
 
-        for y in range(len(self.object_map)):
-            for x in range(len(self.object_map[y])):
-                if self.object_map[y][x] != -1:
-                    pos = self.ungrid_object((x, y), self.object_map[y][x])
-                    self.drawable_objects[self.object_map[y][x]].draw(screen, pos[0], pos[1])
-                if self.temp_object != -1 and (x, y) == temp_obj_grid_pos:
-                    pos = self.ungrid_object(temp_obj_grid_pos, self.temp_object)
-                    self.drawable_objects[self.temp_object].draw(screen, pos[0], pos[1])
-                    drawn_temp_obj = True
+        y = -(self.offset_pos[1] % self.zoomed_tile_size)
+        while y < screen.get_height():
+            x = -(self.offset_pos[0] % self.zoomed_tile_size)
+            while x < screen.get_width():
+                xa, ya = self.grid_pos((x, y))
+                if 0 <= xa and 0 <= ya:
+                    try:
+                        oi = self.object_map[ya][xa]
+                        if oi != -1:
+                            self.drawable_objects[oi].draw(screen, x, y)
+                        if self.temp_object != -1 and (xa, ya) == temp_obj_grid_pos:
+                            self.drawable_objects[self.temp_object].draw(screen, x, y)
+                            drawn_temp_obj = True
+                    except IndexError:
+                        pass
+                x += self.zoomed_tile_size
+            y += self.zoomed_tile_size
 
         if (not drawn_temp_obj) and self.temp_object != -1:
             x, y = self.ungrid_object(temp_obj_grid_pos, self.temp_object)
