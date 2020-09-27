@@ -116,6 +116,8 @@ class Gui:
                 if self.mouse_down:
                     self.map.set_tile((event.pos[0]-self.map_rect[0], event.pos[1]-self.map_rect[1]),
                                       self.tile_manager.selected_tile, self.pen_size)
+                    self.map.set_object((event.pos[0] - self.map_rect[0], event.pos[1] - self.map_rect[1]),
+                                        self.object_manager.selected_object)
                 if self.scroll_pos is not None:
                     self.map.add_offset(self.scroll_pos[0]-event.pos[0], self.scroll_pos[1]-event.pos[1])
             else:
