@@ -4,7 +4,7 @@ from gui_tools import Button, GuiContainer
 
 
 class Gui:
-    TILE_SIZE = 26
+    TILE_SIZE = 34
     OBJECTS_SIZE = 72
 
     cont_width = 200

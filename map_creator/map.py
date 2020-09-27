@@ -60,18 +60,22 @@ class Map:
         self.load()
 
     def load(self):
-        file = open(self.file, "r")
-        line = file.readline()
-        file.close()
 
         try:
+            file = open(self.file, "r")
+            line = file.readline()
+            file.close()
+
             loaded = json.loads(line)
 
             self.tile_map = [[self.tile_manager.get_index(x) for x in y] for y in loaded['tile_map']]
             self.object_map = [[self.object_manager.get_index(x) for x in y] for y in loaded['obj_map']]
-        except KeyError or json.decoder.JSONDecodeError:
+
+        except KeyError:
             pass
         except json.decoder.JSONDecodeError:
+            pass
+        except FileNotFoundError:
             pass
 
     def stringify_map(self, omap, managed_objs):
@@ -186,14 +190,21 @@ class Map:
                     self.drawable_tiles[self.tile_map[y][x]]\
                         .draw(screen, pos[0], pos[1])
 
+        temp_obj_grid_pos = self.grid_pos(self.temp_object_pos)
+        drawn_temp_obj = False
+
         for y in range(len(self.object_map)):
             for x in range(len(self.object_map[y])):
                 if self.object_map[y][x] != -1:
                     pos = self.ungrid_object((x, y), self.object_map[y][x])
                     self.drawable_objects[self.object_map[y][x]].draw(screen, pos[0], pos[1])
+                if self.temp_object != -1 and (x, y) == temp_obj_grid_pos:
+                    pos = self.ungrid_object(temp_obj_grid_pos, self.temp_object)
+                    self.drawable_objects[self.temp_object].draw(screen, pos[0], pos[1])
+                    drawn_temp_obj = True
 
-        if self.temp_object != -1:
-            x, y = self.ungrid_object(self.grid_pos(self.temp_object_pos), self.temp_object)
+        if (not drawn_temp_obj) and self.temp_object != -1:
+            x, y = self.ungrid_object(temp_obj_grid_pos, self.temp_object)
             self.drawable_objects[self.temp_object].draw(screen, x, y)
 
         if self.show_grid:
