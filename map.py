@@ -13,6 +13,9 @@ class Map:
     tile_map = []
     object_map = []
 
+    temp_object = -1
+    temp_object_pos = (0, 0)
+
     offset_pos = (0, 0)
 
     show_grid = True
@@ -129,6 +132,11 @@ class Map:
 
         self.object_map[y][x] = object_i
 
+    def show_temp_object(self, selected_object, pos=None):
+        self.temp_object = -1 if selected_object is None else selected_object
+        if selected_object != -1:
+            self.temp_object_pos = pos
+
     def add_offset(self, x, y):
         self.offset_pos = (x, y)
 
@@ -168,6 +176,14 @@ class Map:
                         .draw(screen,
                               (x * self.zoomed_tile_size) - self.offset_pos[0],
                               (y * self.zoomed_tile_size) - self.offset_pos[1])
+
+        if self.temp_object != -1:
+            x = int((self.temp_object_pos[0]-(self.temp_object_pos[0] % self.zoomed_tile_size))/self.zoomed_tile_size)
+            y = int((self.temp_object_pos[1]-(self.temp_object_pos[1] % self.zoomed_tile_size))/self.zoomed_tile_size)
+            self.drawable_objects[self.temp_object] \
+                .draw(screen,
+                      (x*self.zoomed_tile_size),
+                      (y*self.zoomed_tile_size))
 
         if self.show_grid:
             y = -(self.offset_pos[1] % self.grid_d_size)

@@ -112,11 +112,15 @@ class Gui:
         elif event.type == pygame.MOUSEMOTION:
             if self.map_rect[0] < event.pos[0] < self.map_rect[2] \
                     and self.map_rect[1] < event.pos[1] < self.map_rect[3]:
+                self.map.show_temp_object(self.object_manager.selected_object,
+                                          (event.pos[0]-self.map_rect[0], event.pos[1]-self.map_rect[1]))
                 if self.mouse_down:
-                    self.map.set_tile((event.pos[0]-self.cont_width, event.pos[1]),
+                    self.map.set_tile((event.pos[0]-self.map_rect[0], event.pos[1]-self.map_rect[1]),
                                       self.tile_manager.selected_tile, self.pen_size)
                 if self.scroll_pos is not None:
                     self.map.add_offset(self.scroll_pos[0]-event.pos[0], self.scroll_pos[1]-event.pos[1])
+            else:
+                self.map.show_temp_object(-1)
 
         self.tiles_cont.handle_event(event)
         self.objects_cont.handle_event(event)

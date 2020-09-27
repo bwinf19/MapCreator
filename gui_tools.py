@@ -134,7 +134,7 @@ class GuiContainer:
     def click_obj(self, x):
         self.deselect_all()
         self.objects[x].selected = True
-        self.callback(x)
+        self.callback(x-1)
 
     def __init__(self, objects, objects_size=(32, 32), callback=(lambda x=None: None),
                  rect=(0, 0, 100, 100), with_columns=True):
@@ -144,12 +144,14 @@ class GuiContainer:
         self.callback = callback
         self.cont = Button(0, 0, 100, 100)
         self.objects = []
+        self.objects.append(Button(0, 0, objects_size[0], objects_size[1],
+                                   text='#', callback=(lambda: self.click_obj(0))))
         for i in range(len(objects)):
             self.objects.append(Button(0, 0, objects_size[0], objects_size[1],
                                        image_normal=objects[i].image,
                                        image_down=objects[i].image_down,
                                        image_hover=objects[i].image_hover,
-                                       callback=(lambda x=i: self.click_obj(x))))
+                                       callback=(lambda x=i: self.click_obj(x+1))))
         self.rebuild()
 
     def hits(self, pos):
