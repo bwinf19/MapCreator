@@ -3,11 +3,11 @@ import os
 
 pygame.init()
 
-from lib.map import Map
-from lib.object_manager import ObjectManager
-from lib.tile_manager import TileManager
+from map import Map
+from object_manager import ObjectManager
+from tile_manager import TileManager
 
-from lib.gui import Gui
+from gui import Gui
 
 PATH = "D:/JavaProgs/Mockmon/src/main/resources/"
 
