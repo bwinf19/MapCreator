@@ -1,5 +1,6 @@
 import pygame
 
+from map import Map
 from object_manager import ObjectManager
 from tile_manager import TileManager
 
@@ -11,10 +12,14 @@ screen = pygame.display.set_mode((640, 480), pygame.RESIZABLE)
 
 clock = pygame.time.Clock()
 
-tm = TileManager("tiles")
-om = ObjectManager("objects")
+PATH = "D:/JavaProgs/Mockmon/src/main/resources/"
 
-g = Gui(tm, om)
+tm = TileManager(PATH+"/tiles")
+om = ObjectManager(PATH+"/objects")
+
+ma = Map(tm, om, PATH+"/world.json")
+
+g = Gui(tm, om, ma)
 g.rebuild_scene(640, 480)
 
 running = True

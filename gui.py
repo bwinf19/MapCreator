@@ -26,11 +26,11 @@ class Gui:
         self.tile_manager.selected_tile = None
         self.object_manager.selected_object = x
 
-    def __init__(self, tm, om):
+    def __init__(self, tm, om, ma):
         self.tile_manager = tm
         self.object_manager = om
 
-        self.map = Map(self.tile_manager, self.object_manager)
+        self.map = ma
 
         self.buttons_cont = Button(0, 0, 40, 40)
 

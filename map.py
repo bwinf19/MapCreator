@@ -6,7 +6,7 @@ import json
 
 
 class Map:
-    TILE_SIZE = 16
+    TILE_SIZE = 32
     zoomed_tile_size = TILE_SIZE
     grid_d_size = TILE_SIZE
 
@@ -20,9 +20,29 @@ class Map:
 
     show_grid = True
 
-    FILE = "D:/JavaProgs/Mockmon/src/main/resources/map.json"
+    def grid_pos(self, pos):
+        x = int(math.floor((pos[0] + self.offset_pos[0]) / self.zoomed_tile_size))
+        y = int(math.floor((pos[1] + self.offset_pos[1]) / self.zoomed_tile_size))
+        return x, y
 
-    def __init__(self, tm, om):
+    def ungrid_pos(self, pos):
+        x = (pos[0] * self.zoomed_tile_size) - self.offset_pos[0]
+        y = (pos[1] * self.zoomed_tile_size) - self.offset_pos[1]
+        return x, y
+
+    def grid_object(self, pos, obj_i):
+        x = int((pos[0] + self.offset_pos[0]) / self.zoomed_tile_size)
+        y = pos[1] + self.offset_pos[1] - self.drawable_objects[obj_i].image.get_height()
+        y = int(y / self.zoomed_tile_size) + 1
+        return x, y
+
+    def ungrid_object(self, pos, obj_i):
+        x = (pos[0] * self.zoomed_tile_size) - self.offset_pos[0]
+        y = (pos[1] + 1) * self.zoomed_tile_size - self.drawable_objects[obj_i].image.get_height() - self.offset_pos[1]
+        return x, y
+
+    def __init__(self, tm, om, file):
+        self.file = file
         self.tile_manager = tm
         self.object_manager = om
         self.drawable_tiles = []
@@ -40,7 +60,7 @@ class Map:
         self.load()
 
     def load(self):
-        file = open(self.FILE, "r")
+        file = open(self.file, "r")
         line = file.readline()
         file.close()
 
@@ -73,7 +93,7 @@ class Map:
 
     def save(self):
 
-        file = open(self.FILE, "w")
+        file = open(self.file, "w")
         file.write(json.dumps({
             'tile_map': self.stringify_map(self.tile_map, self.tile_manager.tiles),
             'obj_map': self.stringify_map(self.object_map, self.object_manager.objects)
@@ -85,8 +105,7 @@ class Map:
         if tile_i is None:
             return
         pen_size_off = pen_size-1
-        xs = int(math.floor((pos[0]+self.offset_pos[0]) / self.zoomed_tile_size))
-        ys = int(math.floor((pos[1]+self.offset_pos[1]) / self.zoomed_tile_size))
+        xs, ys = self.grid_pos(pos)
 
         while ys-pen_size_off < 0:
             self.tile_map = [[]] + self.tile_map
@@ -111,8 +130,7 @@ class Map:
     def set_object(self, pos, object_i):
         if object_i is None:
             return
-        x = int(math.floor((pos[0] + self.offset_pos[0]) / self.zoomed_tile_size))
-        y = int(math.floor((pos[1] + self.offset_pos[1]) / self.zoomed_tile_size))
+        x, y = self.grid_pos(pos)
 
         while y < 0:
             self.object_map = [[]] + self.object_map
@@ -164,26 +182,19 @@ class Map:
         for y in range(len(self.tile_map)):
             for x in range(len(self.tile_map[y])):
                 if self.tile_map[y][x] != -1:
+                    pos = self.ungrid_pos((x, y))
                     self.drawable_tiles[self.tile_map[y][x]]\
-                        .draw(screen,
-                              (x * self.zoomed_tile_size) - self.offset_pos[0],
-                              (y * self.zoomed_tile_size) - self.offset_pos[1])
+                        .draw(screen, pos[0], pos[1])
 
         for y in range(len(self.object_map)):
             for x in range(len(self.object_map[y])):
                 if self.object_map[y][x] != -1:
-                    self.drawable_objects[self.object_map[y][x]]\
-                        .draw(screen,
-                              (x * self.zoomed_tile_size) - self.offset_pos[0],
-                              (y * self.zoomed_tile_size) - self.offset_pos[1])
+                    pos = self.ungrid_object((x, y), self.object_map[y][x])
+                    self.drawable_objects[self.object_map[y][x]].draw(screen, pos[0], pos[1])
 
         if self.temp_object != -1:
-            x = int((self.temp_object_pos[0]-(self.temp_object_pos[0] % self.zoomed_tile_size))/self.zoomed_tile_size)
-            y = int((self.temp_object_pos[1]-(self.temp_object_pos[1] % self.zoomed_tile_size))/self.zoomed_tile_size)
-            self.drawable_objects[self.temp_object] \
-                .draw(screen,
-                      (x*self.zoomed_tile_size),
-                      (y*self.zoomed_tile_size))
+            x, y = self.ungrid_object(self.grid_pos(self.temp_object_pos), self.temp_object)
+            self.drawable_objects[self.temp_object].draw(screen, x, y)
 
         if self.show_grid:
             y = -(self.offset_pos[1] % self.grid_d_size)
