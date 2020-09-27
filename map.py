@@ -41,39 +41,40 @@ class Map:
         line = file.readline()
         file.close()
 
-        class MapDecoder(json.JSONDecoder):
-            def decode(self2, s):
-                result = super().decode(s)  # result = super(Decoder, self).decode(s) for Python 2.x
-                return self2._decode(result)
+        try:
+            loaded = json.loads(line)
 
-            def _decode(self2, o):
-                if isinstance(o, str):
-                    return self.tile_manager.get_index(o)
-                elif isinstance(o, dict):
-                    return {k: self2._decode(v) for k, v in o.items()}
-                elif isinstance(o, list):
-                    return [self2._decode(v) for v in o]
-                else:
-                    return o
+            self.tile_map = [[self.tile_manager.get_index(x) for x in y] for y in loaded['tile_map']]
+            self.object_map = [[self.object_manager.get_index(x) for x in y] for y in loaded['obj_map']]
+        except KeyError or json.decoder.JSONDecodeError:
+            pass
+        except json.decoder.JSONDecodeError:
+            pass
 
-        self.tile_map = json.loads(line, cls=MapDecoder)
+    def stringify_map(self, omap, managed_objs):
+        max_len = max([0] + [len(l) for l in omap])
 
-    def save(self):
-        nmap = self.tile_map
-        max_len = max([len(l) for l in self.tile_map])
-
-        for y in self.tile_map:
+        for y in omap:
             for _ in range(max_len - len(y)):
-                y.append(0)
+                y.append(-1)
 
         namemap = []
-        for y in range(len(nmap)):
+        for y in range(len(omap)):
             namemap.append([])
-            for x in range(len(nmap[y])):
-                namemap[y].append(self.tile_manager.tiles[nmap[y][x]].name)
+            for x in range(len(omap[y])):
+                if omap[y][x] == -1:
+                    namemap[y].append('')
+                else:
+                    namemap[y].append(managed_objs[omap[y][x]].name)
+        return namemap
+
+    def save(self):
 
         file = open(self.FILE, "w")
-        file.write(json.dumps(namemap))
+        file.write(json.dumps({
+            'tile_map': self.stringify_map(self.tile_map, self.tile_manager.tiles),
+            'obj_map': self.stringify_map(self.object_map, self.object_manager.objects)
+        }))
         file.close()
         print("saved")
 

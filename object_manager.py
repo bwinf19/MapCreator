@@ -14,7 +14,7 @@ class ObjectManager:
         for i in range(len(self.objects)):
             if name == self.objects[i].name:
                 return i
-        return None
+        return -1
 
 
 class Object:

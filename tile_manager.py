@@ -15,7 +15,7 @@ class TileManager:
         for i in range(len(self.tiles)):
             if name == self.tiles[i].name:
                 return i
-        return None
+        return -1
 
 
 class Tile:
