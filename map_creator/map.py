@@ -158,7 +158,7 @@ class Map:
         self.temp_object = -1 if selected_object is None else selected_object
         if selected_object != -1:
             self.temp_object_pos = pos
-
+            
     def add_offset(self, x, y):
         self.offset_pos = (x, y)
 
@@ -212,12 +212,12 @@ class Map:
                         if oi != -1:
                             pos = self.ungrid_pos(self.grid_object((x, y), oi))
                             self.drawable_objects[oi].draw(screen, pos[0], pos[1])
-                        if self.temp_object != -1 and (xa, ya) == temp_obj_grid_pos:
-                            pos = self.ungrid_pos(self.grid_object((x, y), self.temp_object))
-                            self.drawable_objects[self.temp_object].draw(screen, pos[0], pos[1])
-                            drawn_temp_obj = True
                     except IndexError:
                         pass
+                    if self.temp_object != -1 and (xa, ya) == temp_obj_grid_pos:
+                        pos = self.ungrid_pos(self.grid_object((x, y), self.temp_object))
+                        self.drawable_objects[self.temp_object].draw(screen, pos[0], pos[1])
+                        drawn_temp_obj = True
                 x += self.zoomed_tile_size
             y += self.zoomed_tile_size
 
