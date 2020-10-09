@@ -11,6 +11,8 @@ class Map:
     zoomed_tile_size = TILE_SIZE
     grid_d_size = TILE_SIZE
 
+    spawn_point = (0, 0)
+
     tile_map = []
 
     object_map = []
@@ -70,6 +72,7 @@ class Map:
 
             loaded = json.loads(line)
 
+            self.spawn_point = (loaded['spawn_point']['x'], loaded['spawn_point']['y'])
             self.tile_map = [[self.tile_manager.get_index(x) for x in y] for y in loaded['tile_map']]
             self.object_map = [[self.object_manager.get_index(x) for x in y] for y in loaded['obj_map']]
 
@@ -101,6 +104,7 @@ class Map:
 
         file = open(self.file, "w")
         file.write(json.dumps({
+            'spawn_point': {'x': self.spawn_point[0], 'y': self.spawn_point[1]},
             'tile_map': self.stringify_map(self.tile_map, self.tile_manager.tiles),
             'obj_map': self.stringify_map(self.object_map, self.object_manager.objects)
         }))
