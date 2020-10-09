@@ -94,6 +94,12 @@ class Button(pygame.sprite.Sprite):
         self.button_down = False
         self.selected = False
 
+    def get_width(self):
+        return self.rect.width
+
+    def get_height(self):
+        return self.rect.height
+
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.rect.collidepoint(event.pos) and event.button == 1:
@@ -125,31 +131,15 @@ class GuiContainer:
     OBJ_MARGIN = 8
     max_scroll = 0
 
-    def deselect_all(self):
-        for obj in self.objects:
-            obj.selected = False
-
-    def click_obj(self, x):
-        self.deselect_all()
-        self.objects[x].selected = True
-        self.callback(x-1)
-
-    def __init__(self, objects, objects_size=(32, 32), callback=(lambda x=None: None),
-                 rect=(0, 0, 100, 100), with_columns=True):
+    def __init__(self, buttons,
+                 rect=(0, 0, 100, 100), with_columns=True, horizontal=False):
+        self.horizontal = horizontal
         self.with_columns = with_columns
-        self.objects_size = objects_size
+        self.max_object_size = (max([button.get_width() for button in buttons]),
+                                max([button.get_height() for button in buttons]))
         self.rect = rect
-        self.callback = callback
         self.cont = Button(0, 0, 100, 100)
-        self.objects = []
-        self.objects.append(Button(0, 0, objects_size[0], objects_size[1],
-                                   text='#', callback=(lambda: self.click_obj(0))))
-        for i in range(len(objects)):
-            self.objects.append(Button(0, 0, objects_size[0], objects_size[1],
-                                       image_normal=objects[i].image,
-                                       image_down=objects[i].image_down,
-                                       image_hover=objects[i].image_hover,
-                                       callback=(lambda x=i: self.click_obj(x+1))))
+        self.buttons = buttons
         self.rebuild()
 
     def hits(self, pos):
@@ -160,21 +150,43 @@ class GuiContainer:
         self.rebuild()
 
     def rebuild(self):
+        if self.horizontal:
+            if self.with_columns:
+                cols = max(1, int((self.rect[3] - self.rect[1] - int(self.OBJ_MARGIN / 2))
+                                  / (self.max_object_size[0] + self.OBJ_MARGIN)))
+            else:
+                cols = 1
 
-        if self.with_columns:
-            cols = max(1, int((self.rect[2] - self.rect[0] - int(self.OBJ_MARGIN / 2))
-                              / (self.objects_size[1] + self.OBJ_MARGIN)))
+            self.cont.set_rect(self.rect[0], self.rect[1], self.rect[2] - self.rect[0], self.rect[3] - self.rect[1])
+
+            self.max_scroll = (int(len(self.buttons) / cols) + 1) * (
+                    self.max_object_size[0] + self.OBJ_MARGIN) - (self.rect[2] - self.rect[0])
+
+            i = 0
+            x = self.OBJ_MARGIN
+            while i < len(self.buttons):
+                self.buttons[i].move(
+                    self.rect[0] + self.scroll_offset + x,
+                    self.rect[1] + self.OBJ_MARGIN)
+                x += self.buttons[i].get_width() + self.OBJ_MARGIN
+                i += 1
+
         else:
-            cols = 1
+            if self.with_columns:
+                cols = max(1, int((self.rect[2] - self.rect[0] - int(self.OBJ_MARGIN / 2))
+                                  / (self.max_object_size[1] + self.OBJ_MARGIN)))
+            else:
+                cols = 1
 
-        self.cont.set_rect(self.rect[0], self.rect[1], self.rect[2] - self.rect[0], self.rect[3] - self.rect[1])
+            self.cont.set_rect(self.rect[0], self.rect[1], self.rect[2] - self.rect[0], self.rect[3] - self.rect[1])
 
-        self.max_scroll = (int(len(self.objects) / cols) + 1) * (self.objects_size[1] + self.OBJ_MARGIN) - (self.rect[3] - self.rect[1])
+            self.max_scroll = (int(len(self.buttons) / cols) + 1) * (
+                    self.max_object_size[1] + self.OBJ_MARGIN) - (self.rect[3] - self.rect[1])
 
-        for i in range(len(self.objects)):
-            self.objects[i].move(
-                self.rect[0] + self.OBJ_MARGIN + ((self.objects_size[0] + self.OBJ_MARGIN) * (i % cols)),
-                self.rect[1] + self.scroll_offset + int(i / cols) * (self.objects_size[1] + self.OBJ_MARGIN))
+            for i in range(len(self.buttons)):
+                self.buttons[i].move(
+                    self.rect[0] + self.OBJ_MARGIN + ((self.max_object_size[0] + self.OBJ_MARGIN) * (i % cols)),
+                    self.rect[1] + self.scroll_offset + int(i / cols) * (self.max_object_size[1] + self.OBJ_MARGIN))
 
     def reset_scroll(self):
         self.scroll_offset = self.min_scroll
@@ -185,10 +197,9 @@ class GuiContainer:
             return False
 
         if event.button == 4:
-            self.scroll_offset += 10
-            if self.scroll_offset > self.min_scroll:
-                self.scroll_offset = self.min_scroll
-            self.rebuild()
+            if self.scroll_offset < self.min_scroll:
+                self.scroll_offset += 10
+                self.rebuild()
         elif event.button == 5:
             if self.scroll_offset > -self.max_scroll:
                 self.scroll_offset -= 10
@@ -196,10 +207,35 @@ class GuiContainer:
         return True
 
     def handle_event(self, event):
-        for obj in self.objects:
+        for obj in self.buttons:
             obj.handle_event(event)
 
     def draw(self, screen):
         self.cont.draw(screen)
-        for obj in self.objects:
+        for obj in self.buttons:
             obj.draw(screen)
+
+
+class ObjectGuiContainer(GuiContainer):
+    def deselect_all(self):
+        for obj in self.buttons:
+            obj.selected = False
+
+    def click_obj(self, x):
+        self.deselect_all()
+        self.buttons[x].selected = True
+        self.callback(x-1)
+
+    def __init__(self, objects, objects_size=(32, 32), callback=(lambda x=None: None),
+                 rect=(0, 0, 100, 100), with_columns=True, horizontal=False):
+
+        self.callback = callback
+        buttons = [Button(0, 0, objects_size[0], objects_size[1],
+                          text='#', callback=(lambda: self.click_obj(0)))]
+        for i in range(len(objects)):
+            buttons.append(Button(0, 0, objects_size[0], objects_size[1],
+                                       image_normal=objects[i].image,
+                                       image_down=objects[i].image_down,
+                                       image_hover=objects[i].image_hover,
+                                       callback=(lambda x=i: self.click_obj(x+1))))
+        super(ObjectGuiContainer, self).__init__(buttons, rect, with_columns, horizontal)
