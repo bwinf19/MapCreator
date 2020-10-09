@@ -7,6 +7,7 @@ import json
 
 class Map:
     TILE_SIZE = 32
+    LINE_COLOR = (180, 180, 180)
     zoomed_tile_size = TILE_SIZE
     grid_d_size = TILE_SIZE
 
@@ -228,12 +229,12 @@ class Map:
         if self.show_grid:
             y = -(self.offset_pos[1] % self.grid_d_size)
             while y < screen.get_height():
-                pygame.draw.line(screen, (180, 180, 180), (0, y), (screen.get_width(), y), 1)
+                pygame.draw.line(screen, self.LINE_COLOR, (0, y), (screen.get_width(), y), 1)
                 y += self.grid_d_size
 
             x = -(self.offset_pos[0] % self.grid_d_size)
             while x < screen.get_width():
-                pygame.draw.line(screen, (180, 180, 180), (x, 0), (x, screen.get_height()), 1)
+                pygame.draw.line(screen, self.LINE_COLOR, (x, 0), (x, screen.get_height()), 1)
                 x += self.grid_d_size
 
 
