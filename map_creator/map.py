@@ -104,7 +104,7 @@ class Map:
 
         file = open(self.file, "w")
         file.write(json.dumps({
-            'spawn_point': {'x': self.spawn_point[0], 'y': self.spawn_point[1]},
+            'spawn_point': {'x': str(self.spawn_point[0]), 'y': str(self.spawn_point[1])},
             'tile_map': self.stringify_map(self.tile_map, self.tile_manager.tiles),
             'obj_map': self.stringify_map(self.object_map, self.object_manager.objects)
         }))
@@ -158,6 +158,9 @@ class Map:
             self.object_map[y].append(-1)
 
         self.object_map[y][x] = object_i
+
+    def set_spawn_point(self, pos):
+        self.spawn_point = self.grid_pos(pos)
 
     def show_temp_object(self, selected_object, pos=None):
         self.temp_object = -1 if selected_object is None else selected_object

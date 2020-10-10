@@ -15,6 +15,8 @@ class Gui:
 
     pen_size = 1
 
+    setting_spawn_point = False
+
     def clicked_tile(self, x):
         self.objects_cont.deselect_all()
         self.object_manager.selected_object = None
@@ -24,6 +26,11 @@ class Gui:
         self.tiles_cont.deselect_all()
         self.tile_manager.selected_tile = None
         self.object_manager.selected_object = x
+
+    def set_spawn_point(self):
+        self.clicked_object(None)
+        self.clicked_tile(None)
+        self.setting_spawn_point = True
 
     def __init__(self, tm, om, mm):
         self.tile_manager = tm
@@ -39,6 +46,7 @@ class Gui:
 
         buttons = [
             Button(0, 0, 80, 30, text="Save", callback=self.map_manager.save, image_normal=img),
+            Button(0, 0, 80, 30, text="Set SP", callback=self.set_spawn_point, image_normal=img),
             Button(0, 0, 80, 30, text="Grid", callback=self.map_manager.toggle_grid, image_normal=img),
             self.pen_size_text,
             Button(0, 0, 35, 30, text="+", callback=self.add_pen_size, image_normal=img),
@@ -101,12 +109,17 @@ class Gui:
                 self.mouse_down = True
                 if self.map_rect[0] < event.pos[0] < self.map_rect[2] \
                         and self.map_rect[1] < event.pos[1] < self.map_rect[3]:
-                    self.map_manager.current_map.set_tile((event.pos[0] - self.map_rect[0],
-                                                           event.pos[1] - self.map_rect[1]),
-                                                          self.tile_manager.selected_tile, self.pen_size)
-                    self.map_manager.current_map.set_object((event.pos[0] - self.map_rect[0],
-                                                             event.pos[1] - self.map_rect[1]),
-                                                            self.object_manager.selected_object)
+                    if self.setting_spawn_point:
+                        self.setting_spawn_point = False
+                        self.map_manager.current_map.set_spawn_point((event.pos[0] - self.map_rect[0],
+                                                                      event.pos[1] - self.map_rect[1]))
+                    else:
+                        self.map_manager.current_map.set_tile((event.pos[0] - self.map_rect[0],
+                                                               event.pos[1] - self.map_rect[1]),
+                                                              self.tile_manager.selected_tile, self.pen_size)
+                        self.map_manager.current_map.set_object((event.pos[0] - self.map_rect[0],
+                                                                 event.pos[1] - self.map_rect[1]),
+                                                                self.object_manager.selected_object)
 
             elif event.button == 3:
                 self.scroll_pos = (event.pos[0] + self.map_manager.current_map.offset_pos[0],
