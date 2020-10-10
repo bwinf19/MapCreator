@@ -1,3 +1,4 @@
+import json
 import pygame
 import os
 
@@ -8,7 +9,8 @@ from map_manager import MapManager
 from object_manager import ObjectManager
 from tile_manager import TileManager
 
-PATH = "F:\\PokemonProgProj\\Code\\gruppe-02-github\\Pokemon\\src\\main\\resources"
+with open('config.json') as json_file:
+    PATH = json.load(json_file)['PATH']
 
 screen = pygame.display.set_mode((640, 480), pygame.RESIZABLE)
 
