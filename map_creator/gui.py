@@ -1,6 +1,6 @@
 import pygame
 
-from map_creator.gui_tools import Button, GuiContainer, ObjectGuiContainer, IMAGE_NORMAL
+from gui_tools import Button, GuiContainer, ObjectGuiContainer, IMAGE_NORMAL
 
 
 class Gui:

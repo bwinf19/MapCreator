@@ -1,6 +1,6 @@
 import os
 
-from map_creator.map import Map
+from map import Map
 
 
 class MapManager:

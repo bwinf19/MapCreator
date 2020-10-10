@@ -1,15 +1,14 @@
 import pygame
 import os
 
-
 pygame.init()
 
-from map_creator.gui import Gui
-from map_creator.map_manager import MapManager
-from map_creator.object_manager import ObjectManager
-from map_creator.tile_manager import TileManager
+from gui import Gui
+from map_manager import MapManager
+from object_manager import ObjectManager
+from tile_manager import TileManager
 
-PATH = "D:/JavaProgs/Mockmon/src/main/resources/"
+PATH = "F:\\PokemonProgProj\\Code\\gruppe-02-github\\Pokemon\\src\\main\\resources"
 
 screen = pygame.display.set_mode((640, 480), pygame.RESIZABLE)
 
