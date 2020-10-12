@@ -49,6 +49,10 @@ class Map:
         self.file = file
         self.tile_manager = tm
         self.object_manager = om
+
+        self.sp_image = DrawableSpImage(pygame.image.load("sp.png"))
+        self.sp_image.resize(self.zoomed_tile_size)
+
         self.drawable_tiles = []
         self.drawable_objects = []
         for tile in self.tile_manager.tiles:
@@ -72,7 +76,7 @@ class Map:
 
             loaded = json.loads(line)
 
-            self.spawn_point = (loaded['spawn_point']['x'], loaded['spawn_point']['y'])
+            self.spawn_point = (int(loaded['spawn_point']['x']), int(loaded['spawn_point']['y']))
             self.tile_map = [[self.tile_manager.get_index(x) for x in y] for y in loaded['tile_map']]
             self.object_map = [[self.object_manager.get_index(x) for x in y] for y in loaded['obj_map']]
 
@@ -185,6 +189,8 @@ class Map:
         for obj in self.drawable_objects:
             obj.resize(self.zoomed_tile_size/self.TILE_SIZE)
 
+        self.sp_image.resize(self.zoomed_tile_size)
+
     def toggle_grid(self):
         self.show_grid = not self.show_grid
 
@@ -243,6 +249,22 @@ class Map:
             while x < screen.get_width():
                 pygame.draw.line(screen, self.LINE_COLOR, (x, 0), (x, screen.get_height()), 1)
                 x += self.grid_d_size
+
+        pos = self.ungrid_pos(self.spawn_point)
+        self.sp_image.draw(screen, pos[0], pos[1])
+
+
+class DrawableSpImage:
+    def __init__(self, image):
+        self.original_image = image
+        self.image = self.original_image.copy()
+
+    def resize(self, new_size):
+        self.image = pygame.transform.scale(self.original_image, (new_size, new_size))
+
+    def draw(self, screen, x, y):
+        rect = self.image.get_rect(topleft=(x, y))
+        screen.blit(self.image, rect)
 
 
 class DrawableTile:
