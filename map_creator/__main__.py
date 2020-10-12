@@ -1,4 +1,3 @@
-import json
 import pygame
 import os
 
@@ -9,8 +8,8 @@ from map_manager import MapManager
 from object_manager import ObjectManager
 from tile_manager import TileManager
 
-with open('config.json') as json_file:
-    PATH = json.load(json_file)['PATH']
+with open('config.txt') as file:
+    PATH = file.readlines()[0].split("PATH=")[1]
 
 screen = pygame.display.set_mode((640, 480), pygame.RESIZABLE)
 
