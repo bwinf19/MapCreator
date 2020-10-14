@@ -118,18 +118,18 @@ class Map:
     def expand(self, x, y):
         while y < 0:
             self.tile_map = [[]] + self.tile_map
-            self.offset_pos = (self.offset_pos[0], self.offset_pos[1] + self.zoomed_tile_size)
             self.object_map = [[]] + self.object_map
             self.offset_pos = (self.offset_pos[0], self.offset_pos[1] + self.zoomed_tile_size)
+            self.spawn_point = self.spawn_point[0], self.spawn_point[1] + 1
             y += 1
 
         while x < 0:
             for y2 in range(len(self.tile_map)):
                 self.tile_map[y2] = [-1] + self.tile_map[y2]
-            self.offset_pos = (self.offset_pos[0] + self.zoomed_tile_size, self.offset_pos[1])
             for y2 in range(len(self.object_map)):
                 self.object_map[y2] = [-1] + self.object_map[y2]
             self.offset_pos = (self.offset_pos[0] + self.zoomed_tile_size, self.offset_pos[1])
+            self.spawn_point = self.spawn_point[0] + 1, self.spawn_point[1]
             x += 1
 
     def set_tile(self, pos, tile_i, pen_size=1):
