@@ -17,6 +17,8 @@ class Map:
 
     object_map = []
 
+    npc_map = {}
+
     temp_object = -1
     temp_object_pos = (0, 0)
 
@@ -34,9 +36,9 @@ class Map:
         y = (pos[1] * self.zoomed_tile_size) - self.offset_pos[1]
         return x, y
 
-    def grid_object(self, pos, obj_i):
+    def grid_object(self, pos, image):
         x = int((pos[0] + self.offset_pos[0]) / self.zoomed_tile_size)
-        y = pos[1] + self.offset_pos[1] - self.drawable_objects[obj_i].image.get_height()
+        y = pos[1] + self.offset_pos[1] - image.get_height()
         y = int(y / self.zoomed_tile_size) + 1
         return x, y
 
@@ -45,16 +47,18 @@ class Map:
         y = (pos[1] + 1) * self.zoomed_tile_size - self.drawable_objects[obj_i].image.get_height() - self.offset_pos[1]
         return x, y
 
-    def __init__(self, tm, om, file):
+    def __init__(self, tm, om, trm, file):
         self.file = file
         self.tile_manager = tm
         self.object_manager = om
+        self.npc_manager = trm
 
         self.sp_image = DrawableSpImage(pygame.image.load("sp.png"))
         self.sp_image.resize(self.zoomed_tile_size)
 
         self.drawable_tiles = []
         self.drawable_objects = []
+        self.drawable_npcs = []
         for tile in self.tile_manager.tiles:
             t = DrawableTile(tile.image)
             t.resize(self.zoomed_tile_size)
@@ -64,6 +68,11 @@ class Map:
             t = DrawableObject(obj.image)
             t.resize(self.zoomed_tile_size/self.TILE_SIZE)
             self.drawable_objects.append(t)
+
+        for tr in self.npc_manager.npcs:
+            t = DrawableObject(tr.image)
+            t.resize(self.zoomed_tile_size/self.TILE_SIZE)
+            self.drawable_npcs.append(t)
 
         self.load()
 
@@ -79,6 +88,7 @@ class Map:
             self.spawn_point = (int(loaded['spawn_point']['x']), int(loaded['spawn_point']['y']))
             self.tile_map = [[self.tile_manager.get_index(x) for x in y] for y in loaded['tile_map']]
             self.object_map = [[self.object_manager.get_index(x) for x in y] for y in loaded['obj_map']]
+            self.npc_map = {(int(v['x']), int(v['y'])): self.npc_manager.get_index(v['type']) for v in loaded['npcs']}
 
         except KeyError:
             pass
@@ -87,7 +97,7 @@ class Map:
         except FileNotFoundError:
             pass
 
-    def stringify_map(self, omap, managed_objs):
+    def stringify_list(self, omap, managed_objs):
         max_len = max([0] + [len(l) for l in omap])
 
         for y in omap:
@@ -104,13 +114,20 @@ class Map:
                     namemap[y].append(managed_objs[omap[y][x]].name)
         return namemap
 
+    def stringify_dict(self, odict, managed_objs):
+        nlist = []
+        for k, v in odict.items():
+            nlist.append({'x': int(k[0]), 'y': int(k[1]), 'type': managed_objs[v].name})
+        return nlist
+
     def save(self):
 
         file = open(self.file, "w")
         file.write(json.dumps({
             'spawn_point': {'x': str(self.spawn_point[0]), 'y': str(self.spawn_point[1])},
-            'tile_map': self.stringify_map(self.tile_map, self.tile_manager.tiles),
-            'obj_map': self.stringify_map(self.object_map, self.object_manager.objects)
+            'tile_map': self.stringify_list(self.tile_map, self.tile_manager.tiles),
+            'obj_map': self.stringify_list(self.object_map, self.object_manager.objects),
+            'npcs': self.stringify_dict(self.npc_map, self.npc_manager.npcs)
         }))
         file.close()
         print("saved")
@@ -163,6 +180,12 @@ class Map:
 
         self.object_map[y][x] = object_i
 
+    def set_npc(self, pos, npc_i):
+        if npc_i == -1:
+            del self.npc_map[self.grid_pos(pos)]
+        else:
+            self.npc_map[self.grid_pos(pos)] = npc_i
+
     def set_spawn_point(self, pos):
         self.spawn_point = self.grid_pos(pos)
 
@@ -186,7 +209,7 @@ class Map:
         for tile in self.drawable_tiles:
             tile.resize(self.zoomed_tile_size)
 
-        for obj in self.drawable_objects:
+        for obj in self.drawable_objects+self.drawable_npcs:
             obj.resize(self.zoomed_tile_size/self.TILE_SIZE)
 
         self.sp_image.resize(self.zoomed_tile_size)
@@ -224,13 +247,19 @@ class Map:
                     try:
                         oi = self.object_map[ya][xa]
                         if oi != -1:
-                            pos = self.ungrid_pos(self.grid_object((x, y), oi))
-                            self.drawable_objects[oi].draw(screen, pos[0], pos[1])
+                            obj = self.drawable_objects[oi]
+                            pos = self.ungrid_pos(self.grid_object((x, y), obj.image))
+                            obj.draw(screen, pos[0], pos[1])
                     except IndexError:
                         pass
+                    if (xa, ya) in self.npc_map:
+                        trainer = self.drawable_npcs[self.npc_map[(xa, ya)]]
+                        pos = self.ungrid_pos(self.grid_object((x, y), trainer.image))
+                        trainer.draw(screen, pos[0], pos[1])
                     if self.temp_object != -1 and (xa, ya) == temp_obj_grid_pos:
-                        pos = self.ungrid_pos(self.grid_object((x, y), self.temp_object))
-                        self.drawable_objects[self.temp_object].draw(screen, pos[0], pos[1])
+                        obj = self.drawable_objects[self.temp_object]
+                        pos = self.ungrid_pos(self.grid_object((x, y), obj.image))
+                        obj.draw(screen, pos[0], pos[1])
                         drawn_temp_obj = True
                 x += self.zoomed_tile_size
             y += self.zoomed_tile_size

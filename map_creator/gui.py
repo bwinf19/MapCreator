@@ -6,6 +6,7 @@ from gui_tools import Button, GuiContainer, ObjectGuiContainer, IMAGE_NORMAL
 class Gui:
     TILE_SIZE = 34
     OBJECTS_SIZE = 72
+    TRAINERS_SIZE = 50
 
     cont_width = 200
     map_rect = [cont_width, 0, 100, 100]
@@ -17,24 +18,38 @@ class Gui:
 
     setting_spawn_point = False
 
-    def clicked_tile(self, x):
+    def deselect_all(self):
+        self.tiles_cont.deselect_all()
+        self.npc_cont.deselect_all()
         self.objects_cont.deselect_all()
+        self.tile_manager.selected_tile = None
+        self.npc_manager.selected_npc = None
         self.object_manager.selected_object = None
+
+    def clicked_tile(self, x):
+        self.deselect_all()
+        self.tiles_cont.select(x)
         self.tile_manager.selected_tile = x
 
     def clicked_object(self, x):
-        self.tiles_cont.deselect_all()
-        self.tile_manager.selected_tile = None
+        self.deselect_all()
+        self.objects_cont.select(x)
         self.object_manager.selected_object = x
+
+    def clicked_npc(self, x):
+        self.deselect_all()
+        self.npc_cont.select(x)
+        self.npc_manager.selected_npc = x
 
     def set_spawn_point(self):
         self.clicked_object(None)
         self.clicked_tile(None)
         self.setting_spawn_point = True
 
-    def __init__(self, tm, om, mm):
+    def __init__(self, tm, om, trm, mm):
         self.tile_manager = tm
         self.object_manager = om
+        self.npc_manager = trm
 
         self.map_manager = mm
 
@@ -62,6 +77,9 @@ class Gui:
         self.tiles_cont = ObjectGuiContainer(self.tile_manager.tiles,
                                              (Gui.TILE_SIZE, Gui.TILE_SIZE), self.clicked_tile)
 
+        self.npc_cont = ObjectGuiContainer(self.npc_manager.npcs,
+                                           (Gui.TRAINERS_SIZE, Gui.TRAINERS_SIZE), self.clicked_npc)
+
         self.objects_cont = ObjectGuiContainer(self.object_manager.objects,
                                                (Gui.OBJECTS_SIZE, Gui.OBJECTS_SIZE), self.clicked_object)
 
@@ -77,7 +95,8 @@ class Gui:
     def rebuild_scene(self, width, height):
         self.cont_width = width / 5
 
-        self.tiles_cont.set_rect(0, 0, self.cont_width, height)
+        self.tiles_cont.set_rect(0, 0, self.cont_width, height/2)
+        self.npc_cont.set_rect(0, height / 2, self.cont_width, height)
         self.objects_cont.set_rect(width - self.cont_width, 0, width, height)
 
         self.map_rect = [self.cont_width, 0, width - self.cont_width, height - 40]
@@ -96,6 +115,9 @@ class Gui:
                 pass
 
             elif self.buttons_cont.handle_scroll(event):
+                pass
+
+            elif self.npc_cont.handle_scroll(event):
                 pass
 
             elif self.map_rect[0] < event.pos[0] < self.map_rect[2] \
@@ -120,6 +142,9 @@ class Gui:
                         self.map_manager.current_map.set_object((event.pos[0] - self.map_rect[0],
                                                                  event.pos[1] - self.map_rect[1]),
                                                                 self.object_manager.selected_object)
+                        self.map_manager.current_map.set_npc((event.pos[0] - self.map_rect[0],
+                                                              event.pos[1] - self.map_rect[1]),
+                                                             self.npc_manager.selected_npc)
 
             elif event.button == 3:
                 self.scroll_pos = (event.pos[0] + self.map_manager.current_map.offset_pos[0],
@@ -144,6 +169,9 @@ class Gui:
                     self.map_manager.current_map.set_object((event.pos[0] - self.map_rect[0],
                                                              event.pos[1] - self.map_rect[1]),
                                                             self.object_manager.selected_object)
+                    self.map_manager.current_map.set_npc((event.pos[0] - self.map_rect[0],
+                                                          event.pos[1] - self.map_rect[1]),
+                                                         self.npc_manager.selected_npc)
                 if self.scroll_pos is not None:
                     self.map_manager.current_map.add_offset(self.scroll_pos[0] - event.pos[0],
                                                             self.scroll_pos[1] - event.pos[1])
@@ -151,6 +179,7 @@ class Gui:
                 self.map_manager.current_map.show_temp_object(-1)
 
         self.tiles_cont.handle_event(event)
+        self.npc_cont.handle_event(event)
         self.objects_cont.handle_event(event)
         self.buttons_cont.handle_event(event)
 
@@ -163,4 +192,5 @@ class Gui:
 
         self.buttons_cont.draw(screen)
         self.tiles_cont.draw(screen)
+        self.npc_cont.draw(screen)
         self.objects_cont.draw(screen)

@@ -7,6 +7,7 @@ from gui import Gui
 from map_manager import MapManager
 from object_manager import ObjectManager
 from tile_manager import TileManager
+from npc_manager import NpcManager
 
 loaded = False
 while not loaded:
@@ -28,10 +29,11 @@ clock = pygame.time.Clock()
 
 tm = TileManager(os.path.join(PATH, "tiles"))
 om = ObjectManager(os.path.join(PATH, "objects"))
+trm = NpcManager(os.path.join(PATH, "npc"))
 
-mm = MapManager(PATH, os.path.join(PATH, "objects"), tm, om)
+mm = MapManager(PATH, os.path.join(PATH, "objects"), tm, om, trm)
 
-g = Gui(tm, om, mm)
+g = Gui(tm, om, trm, mm)
 g.rebuild_scene(640, 480)
 
 running = True

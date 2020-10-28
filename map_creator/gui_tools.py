@@ -221,9 +221,12 @@ class ObjectGuiContainer(GuiContainer):
         for obj in self.buttons:
             obj.selected = False
 
+    def select(self, x):
+        self.buttons[x+1].selected = True
+
     def click_obj(self, x):
         self.deselect_all()
-        self.buttons[x].selected = True
+        self.select(x-1)
         self.callback(x-1)
 
     def __init__(self, objects, objects_size=(32, 32), callback=(lambda x=None: None),
