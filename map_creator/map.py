@@ -181,6 +181,8 @@ class Map:
         self.object_map[y][x] = object_i
 
     def set_npc(self, pos, npc_i):
+        if npc_i is None:
+            return
         if npc_i == -1:
             del self.npc_map[self.grid_pos(pos)]
         else:
