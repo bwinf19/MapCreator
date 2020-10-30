@@ -88,7 +88,7 @@ class Map:
             self.spawn_point = (int(loaded['spawn_point']['x']), int(loaded['spawn_point']['y']))
             self.tile_map = [[self.tile_manager.get_index(x) for x in y] for y in loaded['tile_map']]
             self.object_map = [[self.object_manager.get_index(x) for x in y] for y in loaded['obj_map']]
-            self.npc_map = {(int(v['x']), int(v['y'])): self.npc_manager.get_index(v['type']) for v in loaded['npcs']}
+            self.npc_map = {(int(v['x']), int(v['y'])): self.npc_manager.get_index(v['skin']) for v in loaded['npcs']}
 
         except KeyError:
             pass
@@ -117,7 +117,7 @@ class Map:
     def stringify_dict(self, odict, managed_objs):
         nlist = []
         for k, v in odict.items():
-            nlist.append({'x': int(k[0]), 'y': int(k[1]), 'type': managed_objs[v].name})
+            nlist.append({'x': str(k[0]), 'y': str(k[1]), 'skin': managed_objs[v].name})
         return nlist
 
     def save(self):
