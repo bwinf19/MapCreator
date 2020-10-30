@@ -184,7 +184,10 @@ class Map:
         if npc_i is None:
             return
         if npc_i == -1:
-            del self.npc_map[self.grid_pos(pos)]
+            try:
+                del self.npc_map[self.grid_pos(pos)]
+            except KeyError:
+                pass
         else:
             self.npc_map[self.grid_pos(pos)] = npc_i
 

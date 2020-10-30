@@ -222,7 +222,8 @@ class ObjectGuiContainer(GuiContainer):
             obj.selected = False
 
     def select(self, x):
-        self.buttons[x+1].selected = True
+        if x is not None:
+            self.buttons[x+1].selected = True
 
     def click_obj(self, x):
         self.deselect_all()
