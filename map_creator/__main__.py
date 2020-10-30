@@ -29,7 +29,7 @@ clock = pygame.time.Clock()
 
 tm = TileManager(os.path.join(PATH, "tiles"))
 om = ObjectManager(os.path.join(PATH, "objects"))
-trm = NpcManager(os.path.join(PATH, "npc"))
+trm = NpcManager(os.path.join(PATH, "skins"))
 
 mm = MapManager(PATH, os.path.join(PATH, "objects"), tm, om, trm)
 
