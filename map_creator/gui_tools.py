@@ -1,5 +1,7 @@
 import pygame
 
+import pyperclip
+
 FONT = pygame.font.SysFont('calibre', 24)
 # Default button images/ pygame .Surfaces.
 IMAGE_NORMAL = pygame.Surface((100, 100))
@@ -141,13 +143,22 @@ class TextField:
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.rect.collidepoint(event.pos):
-                self.active = not self.active
+                self.active = True
             else:
                 self.active = False
             self.color = TextField.COLOR_ACTIVE if self.active else TextField.COLOR_INACTIVE
         if event.type == pygame.KEYDOWN:
             if self.active:
-                if event.key == pygame.K_RETURN:
+                if pygame.key.get_mods() & pygame.KMOD_CTRL:
+                    if event.key == pygame.K_x:
+                        self.text = ''
+                        self.change()
+                    elif event.key == pygame.K_c:
+                        pyperclip.copy(self.text)
+                    elif event.key == pygame.K_v:
+                        self.text = pyperclip.paste()
+                        self.change()
+                elif event.key == pygame.K_RETURN:
                     self.enter()
                 elif event.key == pygame.K_BACKSPACE:
                     self.text = self.text[:-1]
