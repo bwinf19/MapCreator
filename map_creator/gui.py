@@ -95,7 +95,7 @@ class Gui:
     def rebuild_scene(self, width, height):
         self.cont_width = width / 5
 
-        self.tiles_cont.set_rect(0, 0, self.cont_width, height/2)
+        self.tiles_cont.set_rect(0, 0, self.cont_width, height / 2)
         self.npc_cont.set_rect(0, height / 2, self.cont_width, height)
         self.objects_cont.set_rect(width - self.cont_width, 0, width, height)
 

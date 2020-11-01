@@ -1,7 +1,7 @@
 import math
 
 import pygame
-    
+
 import json
 
 
@@ -66,12 +66,12 @@ class Map:
 
         for obj in self.object_manager.objects:
             t = DrawableObject(obj.image)
-            t.resize(self.zoomed_tile_size/self.TILE_SIZE)
+            t.resize(self.zoomed_tile_size / self.TILE_SIZE)
             self.drawable_objects.append(t)
 
         for tr in self.npc_manager.npcs:
             t = DrawableObject(tr.image)
-            t.resize(self.zoomed_tile_size/self.TILE_SIZE)
+            t.resize(self.zoomed_tile_size / self.TILE_SIZE)
             self.drawable_npcs.append(t)
 
         self.load()
@@ -152,13 +152,13 @@ class Map:
     def set_tile(self, pos, tile_i, pen_size=1):
         if tile_i is None:
             return
-        pen_size_off = pen_size-1
+        pen_size_off = pen_size - 1
         xs, ys = self.grid_pos(pos)
 
-        self.expand(xs-pen_size_off, ys-pen_size_off)
+        self.expand(xs - pen_size_off, ys - pen_size_off)
 
-        for x in range(xs-pen_size_off, xs+pen_size_off+1):
-            for y in range(ys-pen_size_off, ys+pen_size_off+1):
+        for x in range(xs - pen_size_off, xs + pen_size_off + 1):
+            for y in range(ys - pen_size_off, ys + pen_size_off + 1):
                 while y > len(self.tile_map) - 1:
                     self.tile_map.append([])
                 while x > len(self.tile_map[y]) - 1:
@@ -198,24 +198,25 @@ class Map:
         self.temp_object = -1 if selected_object is None else selected_object
         if selected_object != -1:
             self.temp_object_pos = pos
-            
+
     def add_offset(self, x, y):
         self.offset_pos = (x, y)
 
     def zoom(self, x):
-        self.offset_pos = (self.offset_pos[0]/self.zoomed_tile_size, self.offset_pos[1]/self.zoomed_tile_size)
+        self.offset_pos = (self.offset_pos[0] / self.zoomed_tile_size, self.offset_pos[1] / self.zoomed_tile_size)
 
-        self.zoomed_tile_size = max(4, self.zoomed_tile_size+x)
+        self.zoomed_tile_size = max(4, self.zoomed_tile_size + x)
 
         self.grid_d_size = self.zoomed_tile_size
 
-        self.offset_pos = (int(self.offset_pos[0] * self.zoomed_tile_size), int(self.offset_pos[1] * self.zoomed_tile_size))
+        self.offset_pos = (
+        int(self.offset_pos[0] * self.zoomed_tile_size), int(self.offset_pos[1] * self.zoomed_tile_size))
 
         for tile in self.drawable_tiles:
             tile.resize(self.zoomed_tile_size)
 
-        for obj in self.drawable_objects+self.drawable_npcs:
-            obj.resize(self.zoomed_tile_size/self.TILE_SIZE)
+        for obj in self.drawable_objects + self.drawable_npcs:
+            obj.resize(self.zoomed_tile_size / self.TILE_SIZE)
 
         self.sp_image.resize(self.zoomed_tile_size)
 
@@ -321,7 +322,8 @@ class DrawableObject:
 
     def resize(self, scale):
         self.image = pygame.transform.scale(
-            self.original_image, (int(self.original_image.get_width()*scale), int(self.original_image.get_height()*scale)))
+            self.original_image,
+            (int(self.original_image.get_width() * scale), int(self.original_image.get_height() * scale)))
 
     def draw(self, screen, x, y):
         rect = self.image.get_rect(topleft=(x, y))

@@ -21,7 +21,7 @@ while not loaded:
     except:
         PATH = input('Please insert a correct Path to the games resource directory:')
         with open('config.txt', 'w') as file:
-            file.write('PATH='+PATH)
+            file.write('PATH=' + PATH)
 
 screen = pygame.display.set_mode((640, 480), pygame.RESIZABLE)
 

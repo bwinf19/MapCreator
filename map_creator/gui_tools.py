@@ -223,12 +223,12 @@ class ObjectGuiContainer(GuiContainer):
 
     def select(self, x):
         if x is not None:
-            self.buttons[x+1].selected = True
+            self.buttons[x + 1].selected = True
 
     def click_obj(self, x):
         self.deselect_all()
-        self.select(x-1)
-        self.callback(x-1)
+        self.select(x - 1)
+        self.callback(x - 1)
 
     def __init__(self, objects, objects_size=(32, 32), callback=(lambda x=None: None),
                  rect=(0, 0, 100, 100), with_columns=True, horizontal=False):
@@ -238,8 +238,8 @@ class ObjectGuiContainer(GuiContainer):
                           text='#', callback=(lambda: self.click_obj(0)))]
         for i in range(len(objects)):
             buttons.append(Button(0, 0, objects_size[0], objects_size[1],
-                                       image_normal=objects[i].image,
-                                       image_down=objects[i].image_down,
-                                       image_hover=objects[i].image_hover,
-                                       callback=(lambda x=i: self.click_obj(x+1))))
+                                  image_normal=objects[i].image,
+                                  image_down=objects[i].image_down,
+                                  image_hover=objects[i].image_hover,
+                                  callback=(lambda x=i: self.click_obj(x + 1))))
         super(ObjectGuiContainer, self).__init__(buttons, rect, with_columns, horizontal)
