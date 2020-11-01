@@ -89,7 +89,9 @@ class Map:
             self.spawn_point = (int(loaded['spawn_point']['x']), int(loaded['spawn_point']['y']))
             self.tile_map = [[self.tile_manager.get_index(x) for x in y] for y in loaded['tile_map']]
             self.object_map = [[self.object_manager.get_index(x) for x in y] for y in loaded['obj_map']]
-            self.npc_map = {(int(v['x']), int(v['y'])): {'i': self.npc_manager.get_index(v['skin'])} for v in loaded['npcs']}
+            self.npc_map = {
+                (int(v['x']), int(v['y'])):
+                    {'i': self.npc_manager.get_index(v['skin']), 'dialog': v['dialog']} for v in loaded['npcs']}
 
         except KeyError:
             pass
@@ -115,10 +117,10 @@ class Map:
                     namemap[y].append(managed_objs[omap[y][x]].name)
         return namemap
 
-    def stringify_dict(self, odict, managed_objs):
+    def stringify_npcs(self, odict, managed_npcs):
         nlist = []
         for k, v in odict.items():
-            nlist.append({'x': str(k[0]), 'y': str(k[1]), 'skin': managed_objs[v['i']].name})
+            nlist.append({'x': str(k[0]), 'y': str(k[1]), 'skin': managed_npcs[v['i']].name, 'dialog': v['dialog']})
         return nlist
 
     def save(self):
@@ -128,7 +130,7 @@ class Map:
             'spawn_point': {'x': str(self.spawn_point[0]), 'y': str(self.spawn_point[1])},
             'tile_map': self.stringify_list(self.tile_map, self.tile_manager.tiles),
             'obj_map': self.stringify_list(self.object_map, self.object_manager.objects),
-            'npcs': self.stringify_dict(self.npc_map, self.npc_manager.npcs)
+            'npcs': self.stringify_npcs(self.npc_map, self.npc_manager.npcs)
         }))
         file.close()
         print("saved")
@@ -225,7 +227,7 @@ class Map:
         self.grid_d_size = self.zoomed_tile_size
 
         self.offset_pos = (
-        int(self.offset_pos[0] * self.zoomed_tile_size), int(self.offset_pos[1] * self.zoomed_tile_size))
+            int(self.offset_pos[0] * self.zoomed_tile_size), int(self.offset_pos[1] * self.zoomed_tile_size))
 
         for tile in self.drawable_tiles:
             tile.resize(self.zoomed_tile_size)

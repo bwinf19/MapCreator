@@ -38,20 +38,23 @@ class GuiManager:
 
         mm = MapManager(PATH, os.path.join(path, "objects"), tm, om, trm, self)
         self.mg = MapGui(tm, om, trm, mm)
-        self.mg.rebuild_scene(640, 480)
+        self.mg.rebuild_scene(self.screen.get_width(), self.screen.get_height())
         self.npce = NpcEditor()
         self.ng = NpcGui(self.npce, trm, self)
-        self.ng.rebuild_scene(640, 480)
+        self.ng.rebuild_scene(self.screen.get_width(), self.screen.get_height())
 
         self.currg = self.mg
 
     def load_npc(self, pos, npc):
         self.npce.set_npc(pos, npc)
         self.ng.entry()
+        self.ng.rebuild_scene(self.screen.get_width(), self.screen.get_height())
         self.currg = self.ng
 
     def save_npc_and_load(self, pos, npc):
         self.mg.map_manager.current_map.change_npc(pos, npc)
+        self.mg.map_manager.save()
+        self.mg.rebuild_scene(self.screen.get_width(), self.screen.get_height())
         self.currg = self.mg
 
     def start(self):
