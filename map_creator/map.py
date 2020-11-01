@@ -78,7 +78,6 @@ class Map:
         self.load()
 
     def load(self):
-
         try:
             file = open(self.file, "r")
             line = file.readline()
@@ -91,7 +90,8 @@ class Map:
             self.object_map = [[self.object_manager.get_index(x) for x in y] for y in loaded['obj_map']]
             self.npc_map = {
                 (int(v['x']), int(v['y'])):
-                    {'i': self.npc_manager.get_index(v['skin']), 'dialog': v['dialog']} for v in loaded['npcs']}
+                    {'i': self.npc_manager.get_index(v['skin']), 'dialog': v['dialog'], 'pokemon': v['pokemon']} for v
+                in loaded['npcs']}
 
         except KeyError:
             pass
@@ -120,11 +120,11 @@ class Map:
     def stringify_npcs(self, odict, managed_npcs):
         nlist = []
         for k, v in odict.items():
-            nlist.append({'x': str(k[0]), 'y': str(k[1]), 'skin': managed_npcs[v['i']].name, 'dialog': v['dialog']})
+            nlist.append({'x': str(k[0]), 'y': str(k[1]), 'skin': managed_npcs[v['i']].name, 'dialog': v['dialog'],
+                          'pokemon': v['pokemon']})
         return nlist
 
     def save(self):
-
         file = open(self.file, "w")
         file.write(json.dumps({
             'spawn_point': {'x': str(self.spawn_point[0]), 'y': str(self.spawn_point[1])},
@@ -206,7 +206,7 @@ class Map:
             if gp in self.npc_map:
                 self.npc_map[gp]['i'] = npc_i
             else:
-                self.npc_map[gp] = {'i': npc_i, 'dialog': []}
+                self.npc_map[gp] = {'i': npc_i, 'dialog': [], 'pokemon': []}
 
     def set_spawn_point(self, pos):
         self.spawn_point = self.grid_pos(pos)
