@@ -3,11 +3,13 @@ import os
 
 pygame.init()
 
-from gui import Gui
+from mapgui import MapGui
+from npcgui import NpcGui
 from map_manager import MapManager
 from object_manager import ObjectManager
 from tile_manager import TileManager
 from npc_manager import NpcManager
+from npc_editor import NpcEditor
 
 loaded = False
 while not loaded:
@@ -23,34 +25,55 @@ while not loaded:
         with open('config.txt', 'w') as file:
             file.write('PATH=' + PATH)
 
-screen = pygame.display.set_mode((640, 480), pygame.RESIZABLE)
 
-clock = pygame.time.Clock()
+class GuiManager:
+    def __init__(self, path):
+        self.screen = pygame.display.set_mode((640, 480), pygame.RESIZABLE)
 
-tm = TileManager(os.path.join(PATH, "tiles"))
-om = ObjectManager(os.path.join(PATH, "objects"))
-trm = NpcManager(os.path.join(PATH, "skins"))
+        self.clock = pygame.time.Clock()
 
-mm = MapManager(PATH, os.path.join(PATH, "objects"), tm, om, trm)
+        tm = TileManager(os.path.join(path, "tiles"))
+        om = ObjectManager(os.path.join(path, "objects"))
+        trm = NpcManager(os.path.join(path, "skins"))
 
-g = Gui(tm, om, trm, mm)
-g.rebuild_scene(640, 480)
+        mm = MapManager(PATH, os.path.join(path, "objects"), tm, om, trm, self)
+        self.mg = MapGui(tm, om, trm, mm)
+        self.mg.rebuild_scene(640, 480)
+        self.npce = NpcEditor()
+        self.ng = NpcGui(self.npce, trm, self)
+        self.ng.rebuild_scene(640, 480)
 
-running = True
+        self.currg = self.mg
 
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        elif event.type == pygame.VIDEORESIZE:
-            screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
+    def load_npc(self, pos, npc):
+        self.npce.set_npc(pos, npc)
+        self.ng.entry()
+        self.currg = self.ng
 
-        g.handle_event(event)
+    def save_npc_and_load(self, pos, npc):
+        self.mg.map_manager.current_map.change_npc(pos, npc)
+        self.currg = self.mg
 
-    screen.fill((0, 0, 0))
+    def start(self):
+        running = True
 
-    g.render(screen)
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                elif event.type == pygame.VIDEORESIZE:
+                    self.screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
 
-    pygame.display.flip()
+                self.currg.handle_event(event)
 
-    clock.tick()
+            self.screen.fill((0, 0, 0))
+
+            self.currg.render(self.screen)
+
+            pygame.display.flip()
+
+            self.clock.tick()
+
+
+g = GuiManager(PATH)
+g.start()

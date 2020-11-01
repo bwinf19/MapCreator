@@ -3,7 +3,7 @@ import pygame
 from gui_tools import Button, GuiContainer, ObjectGuiContainer, IMAGE_NORMAL
 
 
-class Gui:
+class MapGui:
     TILE_SIZE = 34
     OBJECTS_SIZE = 72
     TRAINERS_SIZE = 50
@@ -75,13 +75,14 @@ class Gui:
         self.buttons_cont = GuiContainer(buttons, horizontal=True, with_columns=False)
 
         self.tiles_cont = ObjectGuiContainer(self.tile_manager.tiles,
-                                             (Gui.TILE_SIZE, Gui.TILE_SIZE), self.clicked_tile)
+                                             (MapGui.TILE_SIZE, MapGui.TILE_SIZE), self.clicked_tile)
 
         self.npc_cont = ObjectGuiContainer(self.npc_manager.npcs,
-                                           (Gui.TRAINERS_SIZE, Gui.TRAINERS_SIZE), self.clicked_npc)
+                                           (MapGui.TRAINERS_SIZE, MapGui.TRAINERS_SIZE),
+                                           self.clicked_npc, extras=['#', '^'])
 
         self.objects_cont = ObjectGuiContainer(self.object_manager.objects,
-                                               (Gui.OBJECTS_SIZE, Gui.OBJECTS_SIZE), self.clicked_object)
+                                               (MapGui.OBJECTS_SIZE, MapGui.OBJECTS_SIZE), self.clicked_object)
 
     def add_pen_size(self):
         self.pen_size += 1

@@ -47,8 +47,9 @@ class Map:
         y = (pos[1] + 1) * self.zoomed_tile_size - self.drawable_objects[obj_i].image.get_height() - self.offset_pos[1]
         return x, y
 
-    def __init__(self, tm, om, trm, file):
+    def __init__(self, tm, om, trm, mm, file):
         self.file = file
+        self.map_manager = mm
         self.tile_manager = tm
         self.object_manager = om
         self.npc_manager = trm
@@ -88,7 +89,7 @@ class Map:
             self.spawn_point = (int(loaded['spawn_point']['x']), int(loaded['spawn_point']['y']))
             self.tile_map = [[self.tile_manager.get_index(x) for x in y] for y in loaded['tile_map']]
             self.object_map = [[self.object_manager.get_index(x) for x in y] for y in loaded['obj_map']]
-            self.npc_map = {(int(v['x']), int(v['y'])): self.npc_manager.get_index(v['skin']) for v in loaded['npcs']}
+            self.npc_map = {(int(v['x']), int(v['y'])): {'i': self.npc_manager.get_index(v['skin'])} for v in loaded['npcs']}
 
         except KeyError:
             pass
@@ -117,7 +118,7 @@ class Map:
     def stringify_dict(self, odict, managed_objs):
         nlist = []
         for k, v in odict.items():
-            nlist.append({'x': str(k[0]), 'y': str(k[1]), 'skin': managed_objs[v].name})
+            nlist.append({'x': str(k[0]), 'y': str(k[1]), 'skin': managed_objs[v['i']].name})
         return nlist
 
     def save(self):
@@ -180,16 +181,30 @@ class Map:
 
         self.object_map[y][x] = object_i
 
+    def change_npc(self, pos, npc):
+        self.npc_map[pos] = npc
+
     def set_npc(self, pos, npc_i):
         if npc_i is None:
             return
-        if npc_i == -1:
+        if npc_i == -2:
             try:
                 del self.npc_map[self.grid_pos(pos)]
             except KeyError:
                 pass
+        elif npc_i == -1:
+            try:
+                gp = self.grid_pos(pos)
+                npc = self.npc_map[gp]
+                self.map_manager.gm.load_npc(gp, npc)
+            except KeyError:
+                pass
         else:
-            self.npc_map[self.grid_pos(pos)] = npc_i
+            gp = self.grid_pos(pos)
+            if gp in self.npc_map:
+                self.npc_map[gp]['i'] = npc_i
+            else:
+                self.npc_map[gp] = {'i': npc_i}
 
     def set_spawn_point(self, pos):
         self.spawn_point = self.grid_pos(pos)
@@ -259,9 +274,9 @@ class Map:
                     except IndexError:
                         pass
                     if (xa, ya) in self.npc_map:
-                        trainer = self.drawable_npcs[self.npc_map[(xa, ya)]]
-                        pos = self.ungrid_pos(self.grid_object((x, y), trainer.image))
-                        trainer.draw(screen, pos[0], pos[1])
+                        npc = self.drawable_npcs[self.npc_map[(xa, ya)]['i']]
+                        pos = self.ungrid_pos(self.grid_object((x, y), npc.image))
+                        npc.draw(screen, pos[0], pos[1])
                     if self.temp_object != -1 and (xa, ya) == temp_obj_grid_pos:
                         obj = self.drawable_objects[self.temp_object]
                         pos = self.ungrid_pos(self.grid_object((x, y), obj.image))

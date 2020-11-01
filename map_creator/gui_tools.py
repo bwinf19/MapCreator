@@ -135,8 +135,10 @@ class GuiContainer:
                  rect=(0, 0, 100, 100), with_columns=True, horizontal=False):
         self.horizontal = horizontal
         self.with_columns = with_columns
-        self.max_object_size = (max([button.get_width() for button in buttons]),
-                                max([button.get_height() for button in buttons]))
+        self.max_object_size = (0, 0)
+        if len(buttons) > 0:
+            self.max_object_size = (max([button.get_width() for button in buttons]),
+                                    max([button.get_height() for button in buttons]))
         self.rect = rect
         self.cont = Button(0, 0, 100, 100)
         self.buttons = buttons
@@ -223,23 +225,28 @@ class ObjectGuiContainer(GuiContainer):
 
     def select(self, x):
         if x is not None:
-            self.buttons[x + 1].selected = True
+            self.buttons[x + self.click_offset].selected = True
 
     def click_obj(self, x):
         self.deselect_all()
-        self.select(x - 1)
-        self.callback(x - 1)
+        self.select(x - self.click_offset)
+        self.callback(x - self.click_offset)
 
     def __init__(self, objects, objects_size=(32, 32), callback=(lambda x=None: None),
-                 rect=(0, 0, 100, 100), with_columns=True, horizontal=False):
+                 rect=(0, 0, 100, 100), with_columns=True, horizontal=False, extras=None):
+        if extras is None:
+            extras = ['#']
+        self.click_offset = len(extras)
 
         self.callback = callback
-        buttons = [Button(0, 0, objects_size[0], objects_size[1],
-                          text='#', callback=(lambda: self.click_obj(0)))]
+        buttons = []
+        for i in range(len(extras)):
+            buttons.append(Button(0, 0, objects_size[0], objects_size[1],
+                                  text=extras[i], callback=(lambda x=i: self.click_obj(x))))
         for i in range(len(objects)):
             buttons.append(Button(0, 0, objects_size[0], objects_size[1],
                                   image_normal=objects[i].image,
                                   image_down=objects[i].image_down,
                                   image_hover=objects[i].image_hover,
-                                  callback=(lambda x=i: self.click_obj(x + 1))))
+                                  callback=(lambda x=i+self.click_offset: self.click_obj(x))))
         super(ObjectGuiContainer, self).__init__(buttons, rect, with_columns, horizontal)
