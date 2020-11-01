@@ -206,7 +206,7 @@ class Map:
             if gp in self.npc_map:
                 self.npc_map[gp]['i'] = npc_i
             else:
-                self.npc_map[gp] = {'i': npc_i}
+                self.npc_map[gp] = {'i': npc_i, 'dialog': []}
 
     def set_spawn_point(self, pos):
         self.spawn_point = self.grid_pos(pos)
