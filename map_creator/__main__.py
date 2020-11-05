@@ -1,6 +1,8 @@
 import pygame
 import os
 
+os.environ['SDL_AUDIODRIVER'] = 'dsp'
+
 pygame.init()
 
 from mapgui import MapGui
