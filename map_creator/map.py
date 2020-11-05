@@ -79,9 +79,7 @@ class Map:
 
     def load(self):
         try:
-            file = open(self.file, "r")
-            line = file.readline()
-            file.close()
+            line = open(self.file, "r").readline()
 
             loaded = json.loads(line)
 
@@ -131,14 +129,12 @@ class Map:
         return nlist
 
     def save(self):
-        file = open(self.file, "w")
-        file.write(json.dumps({
+        open(self.file, "w").write(json.dumps({
             'spawn_point': {'x': str(self.spawn_point[0]), 'y': str(self.spawn_point[1])},
             'tile_map': self.stringify_list(self.tile_map, self.tile_manager.tiles),
             'obj_map': self.stringify_list(self.object_map, self.object_manager.objects),
             'npcs': self.stringify_npcs(self.npc_map, self.npc_manager.npcs)
         }))
-        file.close()
         print("saved")
 
     def expand(self, x, y):
