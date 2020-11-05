@@ -1,1 +1,0 @@
-stickytape __main__.py --output-file build/sticky.py
