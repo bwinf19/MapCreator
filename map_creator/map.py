@@ -117,11 +117,17 @@ class Map:
                     namemap[y].append(managed_objs[omap[y][x]].name)
         return namemap
 
+    def stringify_pokemon(self, pokemon):
+        np = []
+        for p in pokemon:
+            np.append({'name': p['name'], 'species': p['name'].lower(), 'lvl': p['lvl']})
+        return np
+
     def stringify_npcs(self, odict, managed_npcs):
         nlist = []
         for k, v in odict.items():
             nlist.append({'x': str(k[0]), 'y': str(k[1]), 'skin': managed_npcs[v['i']].name, 'dialog': v['dialog'],
-                          'pokemon': v['pokemon']})
+                          'pokemon': self.stringify_pokemon(v['pokemon'])})
         return nlist
 
     def save(self):
