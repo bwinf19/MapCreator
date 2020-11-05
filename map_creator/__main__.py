@@ -17,7 +17,7 @@ loaded = False
 while not loaded:
     try:
         PATH = open('config.txt', 'r').readlines()[0].split("PATH=")[1]
-        for dependency in ['tiles', 'objects']:
+        for dependency in ['tiles', 'objects', 'skins']:
             if not os.path.exists(os.path.join(PATH, dependency)):
                 raise FileNotFoundError
         loaded = True
