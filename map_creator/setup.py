@@ -1,6 +1,6 @@
 from cx_Freeze import setup, Executable
 
-build_exe_options = {'include_files': ['sp.png'],
+build_exe_options = {'include_files': [],
                      "excludes": ["tkinter", "PyQt4.QtSql", "sqlite3",
                                   "scipy", "numpy", "email",
                                   "PyQt4.QtNetwork",
