@@ -1,6 +1,6 @@
 import pygame
 
-from gui_tools import Button, GuiContainer, ObjectGuiContainer, IMAGE_NORMAL
+from gui_tools import Button, GuiContainer, ObjectGuiContainer, IMAGE_NORMAL, ICON_ERASER, ICON_CURSOR
 
 
 class MapGui:
@@ -79,7 +79,7 @@ class MapGui:
 
         self.npc_cont = ObjectGuiContainer(self.npc_manager.npcs,
                                            (MapGui.TRAINERS_SIZE, MapGui.TRAINERS_SIZE),
-                                           self.clicked_npc, extras=['#', '^'])
+                                           self.clicked_npc, extras=[ICON_ERASER, ICON_CURSOR])
 
         self.objects_cont = ObjectGuiContainer(self.object_manager.objects,
                                                (MapGui.OBJECTS_SIZE, MapGui.OBJECTS_SIZE), self.clicked_object)
