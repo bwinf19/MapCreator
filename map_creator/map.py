@@ -143,8 +143,12 @@ class Map:
             self.object_map = [[]] + self.object_map
             self.offset_pos = (self.offset_pos[0], self.offset_pos[1] + self.zoomed_tile_size)
             self.spawn_point = self.spawn_point[0], self.spawn_point[1] + 1
+            moved_npcs = {}
+            for k in list(self.npc_map.keys()):
+                t = self.npc_map[k]
+                moved_npcs[(k[0], k[1]+1)] = t
             y += 1
-
+            self.npc_map = moved_npcs
         while x < 0:
             for y2 in range(len(self.tile_map)):
                 self.tile_map[y2] = [-1] + self.tile_map[y2]
@@ -152,7 +156,12 @@ class Map:
                 self.object_map[y2] = [-1] + self.object_map[y2]
             self.offset_pos = (self.offset_pos[0] + self.zoomed_tile_size, self.offset_pos[1])
             self.spawn_point = self.spawn_point[0] + 1, self.spawn_point[1]
+            moved_npcs = {}
+            for k in list(self.npc_map.keys()):
+                t = self.npc_map[k]
+                moved_npcs[(k[0]+1, k[1])] = t
             x += 1
+            self.npc_map = moved_npcs
 
     def set_tile(self, pos, tile_i, pen_size=1):
         if tile_i is None:
