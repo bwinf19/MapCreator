@@ -23,5 +23,6 @@ class MapManager:
         self.current_map.toggle_grid()
 
     def select_map(self, name):
+        self.save()
         self.selected_map = self.maps[name]
         self.current_map = Map(self.tm, self.om, self.trm, self, self.selected_map)
