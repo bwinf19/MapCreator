@@ -116,9 +116,9 @@ class MapGui:
 
         self.map_rect = [self.cont_width, 40, width - self.cont_width, height - 40]
 
-        self.buttons_cont_top.set_rect(self.cont_width, 0, width - self.cont_width, 40)
+        self.buttons_cont_top.set_rect(self.cont_width, 0, width - self.cont_width + 5, 40)
 
-        self.buttons_cont_bot.set_rect(self.cont_width, height - 40, width - self.cont_width, height)
+        self.buttons_cont_bot.set_rect(self.cont_width, height - 40, width - self.cont_width + 5, height)
 
     def handle_event(self, event):
         if event.type == pygame.VIDEORESIZE:
