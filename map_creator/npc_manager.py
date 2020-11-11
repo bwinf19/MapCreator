@@ -21,6 +21,12 @@ class Npc:
     def __init__(self, folder, filename):
         self.name = filename
         self.image = pygame.image.load(os.path.join(folder, filename, "front.png"))
+        self.images = [
+            self.image.copy(),
+            pygame.image.load(os.path.join(folder, filename, "right.png")),
+            pygame.image.load(os.path.join(folder, filename, "back.png")),
+            pygame.image.load(os.path.join(folder, filename, "left.png"))
+        ]
         self.image_down = self.image.copy()
         pygame.draw.rect(self.image_down, (255, 0, 0), (0, 0, self.image.get_width() - 1, self.image.get_height() - 1),
                          1)

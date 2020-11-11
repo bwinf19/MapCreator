@@ -71,7 +71,7 @@ class Map:
             self.drawable_objects.append(t)
 
         for tr in self.npc_manager.npcs:
-            t = DrawableObject(tr.image)
+            t = DrawableNpc(tr.images)
             t.resize(self.zoomed_tile_size / self.TILE_SIZE)
             self.drawable_npcs.append(t)
 
@@ -86,11 +86,22 @@ class Map:
             self.spawn_point = (int(loaded['spawn_point']['x']), int(loaded['spawn_point']['y']))
             self.tile_map = [[self.tile_manager.get_index(x) for x in y] for y in loaded['tile_map']]
             self.object_map = [[self.object_manager.get_index(x) for x in y] for y in loaded['obj_map']]
-            self.npc_map = {
-                (int(v['x']), int(v['y'])):
-                    {'i': self.npc_manager.get_index(v['skin']), 'dialog': v['dialog'], 'pokemon': v['pokemon']} for v
-                in loaded['npcs']}
-
+            self.npc_map = {}
+            for v in loaded['npcs']:
+                d = 0
+                if 'dir' in v:
+                    d = int(v['dir'])
+                dialog = []
+                if 'dialog' in v:
+                    dialog = v['dialog']
+                pokemon = []
+                if 'pokemon' in v:
+                    pokemon = v['pokemon']
+                self.npc_map[(int(v['x']), int(v['y']))] = {
+                    'i': self.npc_manager.get_index(v['skin']),
+                    'dir': d,
+                    'dialog': dialog,
+                    'pokemon': pokemon}
         except KeyError:
             pass
         except json.decoder.JSONDecodeError:
@@ -124,8 +135,8 @@ class Map:
     def stringify_npcs(self, odict, managed_npcs):
         nlist = []
         for k, v in odict.items():
-            nlist.append({'x': str(k[0]), 'y': str(k[1]), 'skin': managed_npcs[v['i']].name, 'dialog': v['dialog'],
-                          'pokemon': self.stringify_pokemon(v['pokemon'])})
+            nlist.append({'x': str(k[0]), 'y': str(k[1]), 'skin': managed_npcs[v['i']].name, 'dir': str(v['dir']),
+                          'dialog': v['dialog'], 'pokemon': self.stringify_pokemon(v['pokemon'])})
         return nlist
 
     def save(self):
@@ -200,16 +211,32 @@ class Map:
     def set_npc(self, pos, npc_i):
         if npc_i is None:
             return
-        if npc_i == -2:
+        if npc_i == -4:
             try:
                 del self.npc_map[self.grid_pos(pos)]
+            except KeyError:
+                pass
+        elif npc_i == -3:
+            try:
+                gp = self.grid_pos(pos)
+                npc = self.npc_map[gp]
+                self.map_manager.gm.load_npc(gp, npc)
+            except KeyError:
+                pass
+        elif npc_i == -2:
+            try:
+                gp = self.grid_pos(pos)
+                self.npc_map[gp]['dir'] += 1
+                if self.npc_map[gp]['dir'] > 3:
+                    self.npc_map[gp]['dir'] = 0
             except KeyError:
                 pass
         elif npc_i == -1:
             try:
                 gp = self.grid_pos(pos)
-                npc = self.npc_map[gp]
-                self.map_manager.gm.load_npc(gp, npc)
+                self.npc_map[gp]['dir'] -= 1
+                if self.npc_map[gp]['dir'] < 0:
+                    self.npc_map[gp]['dir'] = 3
             except KeyError:
                 pass
         else:
@@ -217,7 +244,7 @@ class Map:
             if gp in self.npc_map:
                 self.npc_map[gp]['i'] = npc_i
             else:
-                self.npc_map[gp] = {'i': npc_i, 'dialog': [], 'pokemon': []}
+                self.npc_map[gp] = {'i': npc_i, 'dir': 0,  'dialog': [], 'pokemon': []}
 
     def set_spawn_point(self, pos):
         self.spawn_point = self.grid_pos(pos)
@@ -288,8 +315,8 @@ class Map:
                         pass
                     if (xa, ya) in self.npc_map:
                         npc = self.drawable_npcs[self.npc_map[(xa, ya)]['i']]
-                        pos = self.ungrid_pos(self.grid_object((x, y), npc.image))
-                        npc.draw(screen, pos[0], pos[1])
+                        pos = self.ungrid_pos(self.grid_object((x, y), npc.images[self.npc_map[(xa, ya)]['dir']]))
+                        npc.draw(screen, self.npc_map[(xa, ya)]['dir'], pos[0], pos[1])
                     if self.temp_object != -1 and (xa, ya) == temp_obj_grid_pos:
                         obj = self.drawable_objects[self.temp_object]
                         pos = self.ungrid_pos(self.grid_object((x, y), obj.image))
@@ -356,3 +383,22 @@ class DrawableObject:
     def draw(self, screen, x, y):
         rect = self.image.get_rect(topleft=(x, y))
         screen.blit(self.image, rect)
+
+
+class DrawableNpc:
+    def __init__(self, images):
+        self.original_images = images
+        self.images = []
+        for image in images:
+            self.images.append(image.copy())
+
+    def resize(self, scale):
+        self.images = []
+        for image in self.original_images:
+            self.images.append(pygame.transform.scale(image,
+                                                      (int(image.get_width() * scale),
+                                                       int(image.get_height() * scale))))
+
+    def draw(self, screen, i, x, y):
+        rect = self.images[i].get_rect(topleft=(x, y))
+        screen.blit(self.images[i], rect)
