@@ -9,7 +9,7 @@ class MapGui:
     TRAINERS_SIZE = 50
 
     cont_width = 200
-    map_rect = [cont_width, 0, 100, 100]
+    map_rect = [cont_width, 40, 100, 100]
 
     mouse_down = False
     scroll_pos = None
@@ -46,6 +46,19 @@ class MapGui:
         self.clicked_tile(None)
         self.setting_spawn_point = True
 
+    def toggle_grid(self):
+        self.map_manager.current_map.toggle_grid()
+
+    def toggle_names(self):
+        self.map_manager.current_map.toggle_object_names()
+        i = 0
+        for node in self.objects_cont.nodes[self.objects_cont.click_offset:]:
+            if node.text == self.object_manager.objects[i].name:
+                node.set_text('', True)
+            else:
+                node.set_text(self.object_manager.objects[i].name, True, fit_rect=True, alpha=128)
+            i += 1
+
     def __init__(self, tm, om, trm, mm):
         self.tile_manager = tm
         self.object_manager = om
@@ -59,20 +72,21 @@ class MapGui:
         self.pen_size_text = Button(0, 0, 120, 30, text="Pen Size: " + str(self.pen_size),
                                     image_hover=IMAGE_NORMAL, image_down=IMAGE_NORMAL)
 
-        buttons = [
+        self.buttons_cont_top = GuiContainer([
+            Button(0, 0, 100, 30, text=str(ma),
+                   callback=lambda x=ma: self.map_manager.select_map(x), image_normal=img)
+            for ma in self.map_manager.maps.keys()
+        ], horizontal=True, with_columns=False)
+
+        self.buttons_cont_bot = GuiContainer([
             Button(0, 0, 80, 30, text="Save", callback=self.map_manager.save, image_normal=img),
             Button(0, 0, 80, 30, text="Set SP", callback=self.set_spawn_point, image_normal=img),
-            Button(0, 0, 80, 30, text="Grid", callback=self.map_manager.toggle_grid, image_normal=img),
+            Button(0, 0, 80, 30, text="Grid", callback=self.toggle_grid, image_normal=img),
             self.pen_size_text,
             Button(0, 0, 35, 30, text="+", callback=self.add_pen_size, image_normal=img),
-            Button(0, 0, 35, 30, text="-", callback=self.sub_pen_size, image_normal=img)
-        ]
-
-        buttons += [Button(0, 0, 100, 30, text=str(ma),
-                           callback=lambda x=ma: self.map_manager.select_map(x), image_normal=img)
-                    for ma in self.map_manager.maps.keys()]
-
-        self.buttons_cont = GuiContainer(buttons, horizontal=True, with_columns=False)
+            Button(0, 0, 35, 30, text="-", callback=self.sub_pen_size, image_normal=img),
+            Button(0, 0, 80, 30, text="Names", callback=self.toggle_names, image_normal=img)
+        ], horizontal=True, with_columns=False)
 
         self.tiles_cont = ObjectGuiContainer(self.tile_manager.tiles,
                                              (MapGui.TILE_SIZE, MapGui.TILE_SIZE), self.clicked_tile)
@@ -100,9 +114,11 @@ class MapGui:
         self.npc_cont.set_rect(0, height / 2, self.cont_width, height)
         self.objects_cont.set_rect(width - self.cont_width, 0, width, height)
 
-        self.map_rect = [self.cont_width, 0, width - self.cont_width, height - 40]
+        self.map_rect = [self.cont_width, 40, width - self.cont_width, height - 40]
 
-        self.buttons_cont.set_rect(self.cont_width, height - 40, width, height)
+        self.buttons_cont_top.set_rect(self.cont_width, 0, width - self.cont_width, 40)
+
+        self.buttons_cont_bot.set_rect(self.cont_width, height - 40, width - self.cont_width, height)
 
     def handle_event(self, event):
         if event.type == pygame.VIDEORESIZE:
@@ -115,7 +131,10 @@ class MapGui:
             elif self.objects_cont.handle_scroll(event):
                 pass
 
-            elif self.buttons_cont.handle_scroll(event):
+            elif self.buttons_cont_top.handle_scroll(event):
+                pass
+
+            elif self.buttons_cont_bot.handle_scroll(event):
                 pass
 
             elif self.npc_cont.handle_scroll(event):
@@ -182,16 +201,18 @@ class MapGui:
         self.tiles_cont.handle_event(event)
         self.npc_cont.handle_event(event)
         self.objects_cont.handle_event(event)
-        self.buttons_cont.handle_event(event)
+        self.buttons_cont_top.handle_event(event)
+        self.buttons_cont_bot.handle_event(event)
 
     def render(self, screen):
         map_screen = pygame.Surface((self.map_rect[2] - self.map_rect[0],
                                      self.map_rect[3] - self.map_rect[1]))
         self.map_manager.current_map.render(map_screen)
-        map_rect = map_screen.get_rect(topleft=(self.cont_width, 0))
+        map_rect = map_screen.get_rect(topleft=(self.cont_width, 40))
         screen.blit(map_screen, map_rect)
 
-        self.buttons_cont.draw(screen)
+        self.buttons_cont_top.draw(screen)
+        self.buttons_cont_bot.draw(screen)
         self.tiles_cont.draw(screen)
         self.npc_cont.draw(screen)
         self.objects_cont.draw(screen)

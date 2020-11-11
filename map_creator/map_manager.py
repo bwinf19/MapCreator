@@ -21,9 +21,6 @@ class MapManager:
         if self.current_map is not None:
             self.current_map.save()
 
-    def toggle_grid(self):
-        self.current_map.toggle_grid()
-
     def select_map(self, name):
         self.save()
         selected_map = self.maps[name]

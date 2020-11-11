@@ -34,6 +34,11 @@ ICON_ROT_RIGHT = Icon((60, 50), (20, 10), pygame.image.fromstring(b'\x00\x00\x00
 
 
 class Button(pygame.sprite.Sprite):
+    text_fit_rect = False
+    text_background_color = (255, 255, 255)
+    text_alpha = 0
+    button_down = False
+    selected = False
 
     def set_image(self, image_normal=IMAGE_NORMAL, image_hover=IMAGE_HOVER, image_down=IMAGE_DOWN):
         self.image_normal_o = pygame.transform.scale(image_normal, (self.rect.width, self.rect.height))
@@ -46,8 +51,13 @@ class Button(pygame.sprite.Sprite):
 
         self.move(self.rect.left, self.rect.top)
 
-    def set_text(self, text, set_active_image=False):
+    def set_text(self, text, set_active_image=False, fit_rect=False, background_color=(255, 255, 255), alpha=0, text_color=None):
+        if text_color is not None:
+            self.text_color = text_color
         self.text = text
+        self.text_fit_rect = fit_rect
+        self.text_background_color = background_color
+        self.text_alpha = alpha
         self.move(self.rect.left, self.rect.top, set_active_image)
 
     def set_rect(self, x, y, w, h):
@@ -61,14 +71,33 @@ class Button(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft=(x, y))
         # To center the text rect.
         image_center = self.image.get_rect().center
-        text_surf = self.font.render(self.text, True, self.text_color)
-        text_rect = text_surf.get_rect(center=image_center)
         # original
         self.image_normal, self.image_hover, self.image_down = \
             self.image_normal_o.copy(), self.image_hover_o.copy(), self.image_down_o.copy()
         # Blit the text onto the images.
-        for image in (self.image_normal, self.image_hover, self.image_down):
-            image.blit(text_surf, text_rect)
+        if self.text != "":
+            font = self.font
+
+            if self.text_fit_rect:
+                size = 24
+                imwidth = self.image_normal.get_width()
+                while True:
+                    font = pygame.font.SysFont('calibre', size)
+                    if font.size(self.text)[0] < imwidth:
+                        break
+                    size -= 1
+            text_surf = font.render(self.text, True, self.text_color)
+            image_center = self.image.get_rect().center
+            text_rect = text_surf.get_rect(center=image_center)
+            if self.text_alpha > 0:
+                s = pygame.Surface(text_rect.size)
+                s.set_alpha(self.text_alpha)
+                s.fill(self.text_background_color)
+
+            for image in (self.image_normal, self.image_hover, self.image_down):
+                if self.text_alpha > 0:
+                    image.blit(s, text_rect)
+                image.blit(text_surf, text_rect)
 
         if set_active_image:
             self.image = self.image_normal
@@ -112,8 +141,6 @@ class Button(pygame.sprite.Sprite):
 
         # This function will be called when the button gets pressed.
         self.callback = callback
-        self.button_down = False
-        self.selected = False
 
     def get_width(self):
         return self.rect.width

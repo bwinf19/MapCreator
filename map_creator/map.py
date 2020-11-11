@@ -66,7 +66,7 @@ class Map:
             self.drawable_tiles.append(t)
 
         for obj in self.object_manager.objects:
-            t = DrawableObject(obj.image)
+            t = DrawableObject(obj.image, obj.name)
             t.resize(self.zoomed_tile_size / self.TILE_SIZE)
             self.drawable_objects.append(t)
 
@@ -249,6 +249,10 @@ class Map:
     def set_spawn_point(self, pos):
         self.spawn_point = self.grid_pos(pos)
 
+    def toggle_object_names(self):
+        for obj in self.drawable_objects:
+            obj.toggle_drawing_name()
+
     def show_temp_object(self, selected_object, pos=None):
         self.temp_object = -1 if selected_object is None else selected_object
         if selected_object != -1:
@@ -270,8 +274,11 @@ class Map:
         for tile in self.drawable_tiles:
             tile.resize(self.zoomed_tile_size)
 
-        for obj in self.drawable_objects + self.drawable_npcs:
+        for obj in self.drawable_objects:
             obj.resize(self.zoomed_tile_size / self.TILE_SIZE)
+
+        for npc in self.drawable_npcs:
+            npc.resize(self.zoomed_tile_size / self.TILE_SIZE)
 
         self.sp_image.resize(self.zoomed_tile_size)
 
@@ -371,14 +378,46 @@ class DrawableTile:
 
 
 class DrawableObject:
-    def __init__(self, image):
-        self.original_image = image
-        self.image = self.original_image.copy()
+    def __init__(self, image, name):
+        self.name = name
+        self.original_image = image.copy()
+
+        self.drawing_name = False
+
+        imwidth = self.original_image.get_width()
+
+        self.last_scale = 1
+
+        self.size = 24
+        while True:
+            font = pygame.font.SysFont('calibre', self.size)
+            if font.size(self.name)[0] < imwidth:
+                break
+            self.size -= 1
+
+        self.image = None
+
+    def toggle_drawing_name(self):
+        self.drawing_name = not self.drawing_name
+        self.resize(self.last_scale)
 
     def resize(self, scale):
+        self.last_scale = scale
+
         self.image = pygame.transform.scale(
             self.original_image,
             (int(self.original_image.get_width() * scale), int(self.original_image.get_height() * scale)))
+
+        if self.drawing_name:
+            font = pygame.font.SysFont('calibre', int(self.size * scale))
+            text_surf = font.render(self.name, True, (0, 0, 0))
+            image_center = self.image.get_rect().center
+            text_rect = text_surf.get_rect(center=image_center)
+            s = pygame.Surface(text_rect.size)
+            s.set_alpha(128)
+            s.fill((255, 255, 255))
+            self.image.blit(s, text_rect)
+            self.image.blit(text_surf, text_rect)
 
     def draw(self, screen, x, y):
         rect = self.image.get_rect(topleft=(x, y))
