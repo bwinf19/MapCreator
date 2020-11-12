@@ -14,6 +14,7 @@ class MapManager:
         self.maps = {}
         self.refresh()
         self.current_map = None
+        self.current_name = None
         self.select_map('world')
 
     def refresh(self):
@@ -29,5 +30,6 @@ class MapManager:
 
     def select_map(self, name):
         self.save()
+        self.current_name = name
         selected_map = self.maps[name]
         self.current_map = Map(self.tm, self.om, self.trm, self, selected_map)

@@ -64,7 +64,6 @@ class GuiManager:
         self.load(self.ng)
 
     def load_map(self):
-        self.mg.refresh_maps()
         self.load(self.mg)
 
     def save_npc_and_load(self, pos, npc):

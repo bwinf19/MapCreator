@@ -1,6 +1,6 @@
 import pygame
 
-from gui_tools import Button, GuiContainer, ObjectGuiContainer, IMAGE_NORMAL, IMAGE_GRAY, ICON_ERASER, ICON_CURSOR, ICON_ROT_LEFT, ICON_ROT_RIGHT
+from gui_tools import Button, GuiContainer, ObjectGuiContainer, IMAGE_NORMAL, IMAGE_DOWN, IMAGE_GRAY, ICON_ERASER, ICON_CURSOR, ICON_ROT_LEFT, ICON_ROT_RIGHT
 
 
 class MapGui:
@@ -65,13 +65,21 @@ class MapGui:
 
     def refresh_maps(self):
         self.map_manager.refresh()
-        self.buttons_cont_top = GuiContainer([
-            Button(0, 0, 100, 30, text=str(ma),
-                   callback=lambda x=ma: self.map_manager.select_map(x), image_normal=IMAGE_GRAY)
-            for ma in self.map_manager.maps.keys()
-        ], horizontal=True, with_columns=False)
+        buttons = []
+        for ma in self.map_manager.maps.keys():
+            if ma == self.map_manager.current_name:
+                buttons.append(Button(0, 0, 100, 30, text=str(ma), image_normal=IMAGE_DOWN))
+            else:
+                buttons.append(Button(0, 0, 100, 30, text=str(ma),
+                                      callback=lambda x=ma: (self.map_manager.select_map(x), self.entry()),
+                                      image_normal=IMAGE_GRAY))
+
+        self.buttons_cont_top = GuiContainer(buttons, horizontal=True, with_columns=False)
 
     def __init__(self, tm, om, trm, mm):
+        self.last_width = None
+        self.last_height = None
+
         self.tile_manager = tm
         self.object_manager = om
         self.npc_manager = trm
@@ -105,7 +113,9 @@ class MapGui:
                                                self.clicked_object, callback_left=self.load_object)
 
     def entry(self):
-        pass
+        self.refresh_maps()
+        if self.last_width is not None:
+            self.rebuild_scene(self.last_width, self.last_height)
 
     def exit(self):
         self.mouse_down = False
@@ -121,6 +131,8 @@ class MapGui:
             self.pen_size_text.set_text("Pen Size: " + str(self.pen_size), True)
 
     def rebuild_scene(self, width, height):
+        self.last_width = width
+        self.last_height = height
         self.cont_width = width / 5
 
         self.tiles_cont.set_rect(0, 0, self.cont_width, height / 2)
