@@ -26,8 +26,8 @@ def save_rect(rect):
 
 def offset_rect(rect, off):
     return [
-        off[0]+rect[0],
-        off[1]+off[3]-rect[1]-rect[3],
+        off[0] + rect[0],
+        off[1] + off[3] - rect[1] - rect[3],
         rect[2],
         rect[3]
     ]
@@ -38,7 +38,7 @@ def is_valid_rect(rect):
 
 
 def rdist(p1, p2):
-    return abs(abs(p1[0])-abs(p2[0])) + abs(abs(p1[1])-abs(p2[1]))
+    return abs(abs(p1[0]) - abs(p2[0])) + abs(abs(p1[1]) - abs(p2[1]))
 
 
 def resize_rect(rect, pos, size):
@@ -54,9 +54,9 @@ def resize_rect(rect, pos, size):
         t = rect[0], rect[1], dx, dy
 
     if t[0] < 0:
-        t = 0, t[1], t[2]+t[0], t[3]
+        t = 0, t[1], t[2] + t[0], t[3]
     elif t[0] >= size[0]:
-        t = size[0]-1, t[1], t[2], t[3]
+        t = size[0] - 1, t[1], t[2], t[3]
     if t[1] < 0:
         t = t[0], 0, t[2], t[3] + t[1]
     elif t[1] >= size[1]:
@@ -123,11 +123,11 @@ class ObjectGui:
 
         self.trigger_textfield = TextField(340, 40, 150, 30, text=self.name, change=self.update)
 
-        self.set_collision_button = Button(0, 120, 200, 30, text='Edit collision box',
-                                           image_normal=IMAGE_GRAY, callback=self.set_collision_box)
+        self.edit_collision_button = Button(0, 120, 200, 30, text='Edit collision box',
+                                            image_normal=IMAGE_GRAY, callback=self.set_collision_box)
 
-        self.set_trigger_box_button = Button(0, 160, 200, 30, text='Edit trigger box',
-                                             image_normal=IMAGE_GRAY, callback=self.set_trigger_box)
+        self.edit_trigger_box_button = Button(0, 160, 200, 30, text='Edit trigger box',
+                                              image_normal=IMAGE_GRAY, callback=self.set_trigger_box)
 
         self.remove_collision_button = Button(0, 200, 200, 30, text='Remove collision box',
                                               image_normal=IMAGE_GRAY, callback=self.remove_collision_box)
@@ -200,7 +200,7 @@ class ObjectGui:
         self.object = self.object_manager.objects[self.object_index]
         self.name = self.object.name
 
-        self.name_text = Button(140, 0, 1, 30, text="Name: "+self.name, fit_text=True)
+        self.name_text = Button(140, 0, 1, 30, text="Name: " + self.name, fit_text=True)
 
         self.config = os.path.join(self.object.path, 'config.json')
 
@@ -227,7 +227,7 @@ class ObjectGui:
 
         else:
             self.data = None
-            self.create_config_button = Button(140, 40, 1, 30, text='Create config.json for '+self.name,
+            self.create_config_button = Button(140, 40, 1, 30, text='Create config.json for ' + self.name,
                                                image_normal=IMAGE_GRAY, fit_text=True, callback=self.create_json)
 
     def create_json(self):
@@ -243,11 +243,11 @@ class ObjectGui:
         self.last_height = height
         self.bg.set_rect(0, 0, width, height)
         if self.data is not None:
-            self.json_info_text = Button(0, height-30, 1, 30, text=str(get_json(self.data)), fit_text=True)
+            self.json_info_text = Button(0, height - 30, 1, 30, text=str(get_json(self.data)), fit_text=True)
 
     def handle_resize_box(self, pos, buffer=30):
         size = self.object.image.get_size()
-        if -buffer <= pos[0] <= size[0]+buffer and -buffer <= pos[1] <= size[1]+buffer:
+        if -buffer <= pos[0] <= size[0] + buffer and -buffer <= pos[1] <= size[1] + buffer:
             if self.setting_collision_box:
                 self.data['collision_box'] = resize_rect(self.data['collision_box'], pos, size)
                 self.update()
@@ -267,6 +267,7 @@ class ObjectGui:
                 if event.button == 1:
                     self.mouse_down = True
                     self.handle_resize_box((event.pos[0] - self.IMAGE_OFFSET[0], event.pos[1] - self.IMAGE_OFFSET[1]))
+
             elif event.type == pygame.MOUSEMOTION:
                 if self.mouse_down:
                     self.handle_resize_box((event.pos[0] - self.IMAGE_OFFSET[0], event.pos[1] - self.IMAGE_OFFSET[1]))
@@ -275,13 +276,13 @@ class ObjectGui:
                     self.mouse_down = False
 
             if not self.setting_collision_box:
-                self.set_collision_button.handle_event(event)
+                self.edit_collision_button.handle_event(event)
             else:
-                self.set_collision_button.handle_event(EMPTY_MOUSE_EVENT)
+                self.edit_collision_button.handle_event(EMPTY_MOUSE_EVENT)
             if not self.setting_trigger_box:
-                self.set_trigger_box_button.handle_event(event)
+                self.edit_trigger_box_button.handle_event(event)
             else:
-                self.set_trigger_box_button.handle_event(EMPTY_MOUSE_EVENT)
+                self.edit_trigger_box_button.handle_event(EMPTY_MOUSE_EVENT)
             if is_valid_rect(self.data['collision_box']):
                 self.remove_collision_button.handle_event(event)
             if is_valid_rect(self.data['trigger_box']):
@@ -306,9 +307,9 @@ class ObjectGui:
             self.collision_toggle_button.draw(screen)
             self.trigger_textfield.draw(screen)
             if not self.setting_collision_box:
-                self.set_collision_button.draw(screen)
+                self.edit_collision_button.draw(screen)
             if not self.setting_trigger_box:
-                self.set_trigger_box_button.draw(screen)
+                self.edit_trigger_box_button.draw(screen)
             if is_valid_rect(self.data['collision_box']):
                 self.remove_collision_button.draw(screen)
                 pygame.draw.rect(screen, (255, 0, 0), offset_rect(self.data['collision_box'], image_rect), 3)
