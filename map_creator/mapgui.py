@@ -107,10 +107,10 @@ class MapGui:
             Button(0, 0, 80, 30, text="Save", callback=self.map_manager.save, image_normal=IMAGE_GRAY),
             Button(0, 0, 80, 30, text="Set SP", callback=self.set_spawn_point, image_normal=IMAGE_GRAY),
             Button(0, 0, 80, 30, text="Grid", callback=self.toggle_grid, image_normal=IMAGE_GRAY),
+            Button(0, 0, 80, 30, text="Names", callback=self.toggle_names, image_normal=IMAGE_GRAY),
             self.pen_size_text,
             Button(0, 0, 35, 30, text="+", callback=self.add_pen_size, image_normal=IMAGE_GRAY),
-            Button(0, 0, 35, 30, text="-", callback=self.sub_pen_size, image_normal=IMAGE_GRAY),
-            Button(0, 0, 80, 30, text="Names", callback=self.toggle_names, image_normal=IMAGE_GRAY)
+            Button(0, 0, 35, 30, text="-", callback=self.sub_pen_size, image_normal=IMAGE_GRAY)
         ], horizontal=True, with_columns=False)
 
         self.tiles_cont = ObjectGuiContainer(self.tile_manager.tiles,
