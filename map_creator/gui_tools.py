@@ -105,12 +105,20 @@ class Button(pygame.sprite.Sprite):
         if set_active_image:
             self.image = self.image_normal
 
+    def show(self):
+        self.hidden = False
+
+    def hide(self):
+        self.hidden = True
+
     def __init__(self, x, y, width, height, callback=lambda: None,
                  callback_left=lambda: None,
                  font=FONT, text='', text_color=(0, 0, 0),
                  image_normal=IMAGE_NORMAL, image_hover=IMAGE_HOVER,
                  image_down=IMAGE_DOWN, fit_text=False, center=False):
         super().__init__()
+
+        self.hidden = False
 
         self.text = text
         self.font = font
@@ -154,6 +162,8 @@ class Button(pygame.sprite.Sprite):
         return self.rect.height
 
     def handle_event(self, event):
+        if self.hidden:
+            return
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.rect.collidepoint(event.pos):
                 if event.button == 1:
@@ -177,6 +187,8 @@ class Button(pygame.sprite.Sprite):
                 self.image = self.image_normal
 
     def draw(self, screen):
+        if self.hidden:
+            return
         if self.selected:
             screen.blit(self.image_down, self.rect)
         else:
@@ -356,7 +368,7 @@ class GuiContainer:
             for obj in self.nodes:
                 obj.draw(empty_screen)
 
-            screen.blit(empty_screen, self.rect, area=self.rect)
+            screen.blit(empty_screen, self.rect, area=(self.rect[0], self.rect[1], self.get_width(), self.get_height()))
         else:
             self.cont.draw(screen)
             for obj in self.nodes:
