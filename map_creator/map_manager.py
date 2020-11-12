@@ -9,13 +9,19 @@ class MapManager:
         self.om = om
         self.trm = trm
         self.gm = gm
-        self.maps = {'world': os.path.join(main, 'world.json')}
-        for filename in os.listdir(folder):
-            path = os.path.join(folder, filename, 'inner-world.json')
-            if os.path.isfile(path):
-                self.maps[filename] = path
+        self.main = main
+        self.folder = folder
+        self.maps = {}
+        self.refresh()
         self.current_map = None
         self.select_map('world')
+
+    def refresh(self):
+        self.maps = {'world': os.path.join(self.main, 'world.json')}
+        for filename in os.listdir(self.folder):
+            path = os.path.join(self.folder, filename, 'inner-world.json')
+            if os.path.isfile(path):
+                self.maps[filename] = path
 
     def save(self):
         if self.current_map is not None:

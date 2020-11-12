@@ -63,6 +63,14 @@ class MapGui:
         if x >= 0:
             self.map_manager.gm.load_object(x)
 
+    def refresh_maps(self):
+        self.map_manager.refresh()
+        self.buttons_cont_top = GuiContainer([
+            Button(0, 0, 100, 30, text=str(ma),
+                   callback=lambda x=ma: self.map_manager.select_map(x), image_normal=IMAGE_GRAY)
+            for ma in self.map_manager.maps.keys()
+        ], horizontal=True, with_columns=False)
+
     def __init__(self, tm, om, trm, mm):
         self.tile_manager = tm
         self.object_manager = om
@@ -73,11 +81,8 @@ class MapGui:
         self.pen_size_text = Button(0, 0, 120, 30, text="Pen Size: " + str(self.pen_size),
                                     image_hover=IMAGE_NORMAL, image_down=IMAGE_NORMAL)
 
-        self.buttons_cont_top = GuiContainer([
-            Button(0, 0, 100, 30, text=str(ma),
-                   callback=lambda x=ma: self.map_manager.select_map(x), image_normal=IMAGE_GRAY)
-            for ma in self.map_manager.maps.keys()
-        ], horizontal=True, with_columns=False)
+        self.buttons_cont_top = None
+        self.refresh_maps()
 
         self.buttons_cont_bot = GuiContainer([
             Button(0, 0, 80, 30, text="Save", callback=self.map_manager.save, image_normal=IMAGE_GRAY),
