@@ -5,10 +5,15 @@ import pygame
 
 class ObjectManager:
     def __init__(self, folder):
-        self.objects = []
-        for filename in os.listdir(folder):
-            self.objects.append(Object(folder, filename))
+        self.folder = folder
+        self.objects = None
+        self.refresh()
         self.selected_object = None
+
+    def refresh(self):
+        self.objects = []
+        for filename in os.listdir(self.folder):
+            self.objects.append(Object(self.folder, filename))
 
     def get_index(self, name):
         for i in range(len(self.objects)):

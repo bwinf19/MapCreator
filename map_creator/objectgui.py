@@ -1,3 +1,5 @@
+import shutil
+
 import pygame
 
 from gui_tools import Button, GuiContainer, TextField, ObjectGuiContainer, IMAGE_GRAY, EMPTY_MOUSE_EVENT
@@ -136,6 +138,12 @@ class ObjectGui:
         self.remove_trigger_box_button = Button(0, 0, 200, 30, text='Remove trigger box',
                                                 image_normal=IMAGE_GRAY, callback=self.remove_trigger_box)
 
+        spacer = Button(0, 0, 200, 30)
+        spacer.hide()
+
+        clone_object_button = Button(0, 0, 200, 30, text='Clone Object',
+                                     image_normal=IMAGE_GRAY, callback=self.clone_object)
+
         self.create_inner_world_button = Button(0, 0, 200, 30, text='Create inner world',
                                                 image_normal=IMAGE_GRAY, callback=self.create_inner_world)
 
@@ -146,8 +154,11 @@ class ObjectGui:
                                           self.edit_trigger_box_button,
                                           self.remove_collision_button,
                                           self.remove_trigger_box_button,
+                                          spacer,
+                                          clone_object_button,
                                           self.create_inner_world_button,
-                                          self.remove_inner_world_button],
+                                          self.remove_inner_world_button,
+                                          ],
                                          care_size=True,
                                          with_columns=False,
                                          horizontal=False)
@@ -190,6 +201,20 @@ class ObjectGui:
             print('removed inner world')
         self.remove_inner_world_button.hide()
         self.create_inner_world_button.show()
+
+    def clone_object(self):
+        i = 0
+        pa = self.object.path
+        if pa[-1].isnumeric():
+            pa = pa[:-1]
+        while os.path.exists(pa+str(i)):
+            i += 1
+        np = pa+str(i)
+        os.mkdir(np)
+        for p in ['config.json', 'image.png', 'inner-world.json']:
+            if os.path.exists(os.path.join(self.object.path, p)):
+                shutil.copyfile(os.path.join(self.object.path, p), os.path.join(np, p))
+        self.gm.load_map()
 
     def set_collision_box(self):
         self.setting_collision_box = True

@@ -63,7 +63,7 @@ class MapGui:
         if x >= 0:
             self.map_manager.gm.load_object(x)
 
-    def refresh_maps(self):
+    def refresh(self):
         self.map_manager.refresh()
         buttons = []
         for ma in self.map_manager.maps.keys():
@@ -75,6 +75,10 @@ class MapGui:
                                       image_normal=IMAGE_GRAY))
 
         self.buttons_cont_top = GuiContainer(buttons, horizontal=True, with_columns=False)
+
+        self.object_manager.refresh()
+        self.objects_cont = ObjectGuiContainer(self.object_manager.objects, (MapGui.OBJECTS_SIZE, MapGui.OBJECTS_SIZE),
+                                               self.clicked_object, callback_left=self.load_object)
 
     def __init__(self, tm, om, trm, mm):
         self.last_width = None
@@ -90,7 +94,6 @@ class MapGui:
                                     image_hover=IMAGE_NORMAL, image_down=IMAGE_NORMAL)
 
         self.buttons_cont_top = None
-        self.refresh_maps()
 
         self.buttons_cont_bot = GuiContainer([
             Button(0, 0, 80, 30, text="Save", callback=self.map_manager.save, image_normal=IMAGE_GRAY),
@@ -109,17 +112,18 @@ class MapGui:
                                            self.clicked_npc,
                                            extras=[ICON_ERASER, ICON_CURSOR, ICON_ROT_LEFT, ICON_ROT_RIGHT])
 
-        self.objects_cont = ObjectGuiContainer(self.object_manager.objects, (MapGui.OBJECTS_SIZE, MapGui.OBJECTS_SIZE),
-                                               self.clicked_object, callback_left=self.load_object)
+        self.objects_cont = None
+        self.refresh()
 
     def entry(self):
-        self.refresh_maps()
+        self.refresh()
         if self.last_width is not None:
             self.rebuild_scene(self.last_width, self.last_height)
 
     def exit(self):
         self.mouse_down = False
         self.scroll_pos = None
+        self.deselect_all()
 
     def add_pen_size(self):
         self.pen_size += 1
