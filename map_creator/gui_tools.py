@@ -109,6 +109,7 @@ class Button(pygame.sprite.Sprite):
         self.hidden = False
 
     def hide(self):
+        self.button_down = False
         self.hidden = True
 
     def __init__(self, x, y, width, height, callback=lambda: None,

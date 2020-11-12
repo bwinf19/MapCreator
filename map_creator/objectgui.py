@@ -292,11 +292,13 @@ class ObjectGui:
             self.data = {'collision': loaded['collision'] == 'true'}
             if 'collision_box' in loaded:
                 self.data['collision_box'] = load_rect(loaded['collision_box'])
+                self.remove_collision_button.show()
             else:
                 self.data['collision_box'] = 0, 0, 0, 0
                 self.remove_collision_button.hide()
             if 'trigger_box' in loaded:
                 self.data['trigger_box'] = load_rect(loaded['trigger_box'])
+                self.remove_trigger_box_button.show()
             else:
                 self.data['trigger_box'] = 0, 0, 0, 0
                 self.remove_trigger_box_button.hide()
