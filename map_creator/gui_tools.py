@@ -224,6 +224,10 @@ class TextField:
                     self.change()
                 self.txt_surface = FONT.render(self.text, True, self.color)
 
+    def set_text(self, text):
+        self.text = text
+        self.txt_surface = FONT.render(self.text, True, self.color)
+
     def set_rect(self, x, y, w, h):
         self.rect = pygame.Rect(x, y, w, h)
 
