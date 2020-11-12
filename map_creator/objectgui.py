@@ -203,10 +203,10 @@ class ObjectGui:
         self.create_inner_world_button.show()
 
     def clone_object(self):
-        i = 0
         pa = self.object.path
         if pa[-1].isnumeric():
             pa = pa[:-1]
+        i = 1
         while os.path.exists(pa+str(i)):
             i += 1
         np = pa+str(i)
