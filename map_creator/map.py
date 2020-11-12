@@ -249,9 +249,9 @@ class Map:
     def set_spawn_point(self, pos):
         self.spawn_point = self.grid_pos(pos)
 
-    def toggle_object_names(self):
+    def set_object_names(self, drawing_names):
         for obj in self.drawable_objects:
-            obj.toggle_drawing_name()
+            obj.set_drawing_name(drawing_names)
 
     def show_temp_object(self, selected_object, pos=None):
         self.temp_object = -1 if selected_object is None else selected_object
@@ -397,9 +397,10 @@ class DrawableObject:
 
         self.image = None
 
-    def toggle_drawing_name(self):
-        self.drawing_name = not self.drawing_name
-        self.resize(self.last_scale)
+    def set_drawing_name(self, drawing_name):
+        if drawing_name != self.drawing_name:
+            self.drawing_name = drawing_name
+            self.resize(self.last_scale)
 
     def resize(self, scale):
         self.last_scale = scale

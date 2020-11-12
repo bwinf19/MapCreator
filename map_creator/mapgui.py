@@ -49,15 +49,19 @@ class MapGui:
     def toggle_grid(self):
         self.map_manager.current_map.toggle_grid()
 
-    def toggle_names(self):
-        self.map_manager.current_map.toggle_object_names()
+    def update_show_names(self):
+        self.map_manager.current_map.set_object_names(self.show_names)
         i = 0
         for node in self.objects_cont.nodes[self.objects_cont.click_offset:]:
-            if node.text == self.object_manager.objects[i].name:
-                node.set_text('', True)
-            else:
+            if self.show_names:
                 node.set_text(self.object_manager.objects[i].name, True, fit_rect=True, alpha=128)
+            else:
+                node.set_text('', True)
             i += 1
+
+    def toggle_names(self):
+        self.show_names = not self.show_names
+        self.update_show_names()
 
     def load_object(self, x):
         if x >= 0:
@@ -80,9 +84,13 @@ class MapGui:
         self.objects_cont = ObjectGuiContainer(self.object_manager.objects, (MapGui.OBJECTS_SIZE, MapGui.OBJECTS_SIZE),
                                                self.clicked_object, callback_left=self.load_object)
 
+        self.update_show_names()
+
     def __init__(self, tm, om, trm, mm):
         self.last_width = None
         self.last_height = None
+
+        self.show_names = False
 
         self.tile_manager = tm
         self.object_manager = om
