@@ -1,6 +1,6 @@
 import pygame
 
-from gui_tools import Button, ObjectGuiContainer, GuiContainer, TextField
+from gui_tools import Button, ObjectGuiContainer, GuiContainer, TextField, IMAGE_GRAY
 
 
 class NpcGui:
@@ -15,14 +15,11 @@ class NpcGui:
         self.npc_manager = npcm
         self.npc_editor = npce
 
-        img = pygame.Surface((100, 100))
-        img.fill((150, 150, 150))
-
-        self.back_button = Button(0, 0, 120, 30, text="Cancel", image_normal=img,
+        self.back_button = Button(0, 0, 120, 30, text="Cancel", image_normal=IMAGE_GRAY,
                                   callback=lambda: self.gm.save_npc_and_load(self.npc_editor.pos,
                                                                              self.npc_editor.cnpc))
 
-        self.save_button = Button(0, 40, 120, 30, text="Save", image_normal=img,
+        self.save_button = Button(0, 40, 120, 30, text="Save", image_normal=IMAGE_GRAY,
                                   callback=lambda: self.gm.save_npc_and_load(self.npc_editor.pos,
                                                                              self.npc_editor.npc))
 
@@ -33,15 +30,15 @@ class NpcGui:
                                            with_columns=False, horizontal=True)
 
         self.dialog_info_text = Button(0, 100, 130, 35, text='Dialog Lines')
-        self.dialog_options = GuiContainer([Button(0, 0, 35, 35, text='+', image_normal=img, callback=self.add_dialog),
-                                            Button(0, 0, 35, 35, text='-', image_normal=img, callback=self.sub_dialog)], care_size=False)
+        self.dialog_options = GuiContainer([Button(0, 0, 35, 35, text='+', image_normal=IMAGE_GRAY, callback=self.add_dialog),
+                                            Button(0, 0, 35, 35, text='-', image_normal=IMAGE_GRAY, callback=self.sub_dialog)], care_size=False)
         self.dialog_options.set_rect(0, 0, 100, 35)
 
         self.pokemon_info_text = GuiContainer([Button(0, 0, 100, 35, text='Poke-Name'),
                                                Button(0, 0, 50, 35, text='Lvl')], care_size=False)
         self.pokemon_info_text.set_rect(0, 0, 200, 35)
-        self.pokemon_options = GuiContainer([Button(0, 0, 35, 35, text='+', image_normal=img, callback=self.add_pokemon),
-                                             Button(0, 0, 35, 35, text='-', image_normal=img, callback=self.sub_pokemon)], care_size=False)
+        self.pokemon_options = GuiContainer([Button(0, 0, 35, 35, text='+', image_normal=IMAGE_GRAY, callback=self.add_pokemon),
+                                             Button(0, 0, 35, 35, text='-', image_normal=IMAGE_GRAY, callback=self.sub_pokemon)], care_size=False)
         self.pokemon_options.set_rect(0, 0, 100, 35)
 
         self.dialog_textfields = []

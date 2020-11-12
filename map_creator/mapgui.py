@@ -1,6 +1,6 @@
 import pygame
 
-from gui_tools import Button, GuiContainer, ObjectGuiContainer, IMAGE_NORMAL, ICON_ERASER, ICON_CURSOR, ICON_ROT_LEFT, ICON_ROT_RIGHT
+from gui_tools import Button, GuiContainer, ObjectGuiContainer, IMAGE_NORMAL, IMAGE_GRAY, ICON_ERASER, ICON_CURSOR, ICON_ROT_LEFT, ICON_ROT_RIGHT
 
 
 class MapGui:
@@ -70,26 +70,23 @@ class MapGui:
 
         self.map_manager = mm
 
-        img = pygame.Surface((100, 100))
-        img.fill((150, 150, 150))
-
         self.pen_size_text = Button(0, 0, 120, 30, text="Pen Size: " + str(self.pen_size),
                                     image_hover=IMAGE_NORMAL, image_down=IMAGE_NORMAL)
 
         self.buttons_cont_top = GuiContainer([
             Button(0, 0, 100, 30, text=str(ma),
-                   callback=lambda x=ma: self.map_manager.select_map(x), image_normal=img)
+                   callback=lambda x=ma: self.map_manager.select_map(x), image_normal=IMAGE_GRAY)
             for ma in self.map_manager.maps.keys()
         ], horizontal=True, with_columns=False)
 
         self.buttons_cont_bot = GuiContainer([
-            Button(0, 0, 80, 30, text="Save", callback=self.map_manager.save, image_normal=img),
-            Button(0, 0, 80, 30, text="Set SP", callback=self.set_spawn_point, image_normal=img),
-            Button(0, 0, 80, 30, text="Grid", callback=self.toggle_grid, image_normal=img),
+            Button(0, 0, 80, 30, text="Save", callback=self.map_manager.save, image_normal=IMAGE_GRAY),
+            Button(0, 0, 80, 30, text="Set SP", callback=self.set_spawn_point, image_normal=IMAGE_GRAY),
+            Button(0, 0, 80, 30, text="Grid", callback=self.toggle_grid, image_normal=IMAGE_GRAY),
             self.pen_size_text,
-            Button(0, 0, 35, 30, text="+", callback=self.add_pen_size, image_normal=img),
-            Button(0, 0, 35, 30, text="-", callback=self.sub_pen_size, image_normal=img),
-            Button(0, 0, 80, 30, text="Names", callback=self.toggle_names, image_normal=img)
+            Button(0, 0, 35, 30, text="+", callback=self.add_pen_size, image_normal=IMAGE_GRAY),
+            Button(0, 0, 35, 30, text="-", callback=self.sub_pen_size, image_normal=IMAGE_GRAY),
+            Button(0, 0, 80, 30, text="Names", callback=self.toggle_names, image_normal=IMAGE_GRAY)
         ], horizontal=True, with_columns=False)
 
         self.tiles_cont = ObjectGuiContainer(self.tile_manager.tiles,

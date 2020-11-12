@@ -14,6 +14,8 @@ IMAGE_HOVER.fill(HOVER_COLOR)
 DOWN_COLOR = pygame.Color('aquamarine1')
 IMAGE_DOWN = pygame.Surface(DEFAULT_SIZE)
 IMAGE_DOWN.fill(DOWN_COLOR)
+IMAGE_GRAY = pygame.Surface(DEFAULT_SIZE)
+IMAGE_GRAY.fill((150, 150, 150))
 
 
 class Icon:
