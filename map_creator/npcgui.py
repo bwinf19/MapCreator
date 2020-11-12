@@ -34,14 +34,14 @@ class NpcGui:
 
         self.dialog_info_text = Button(0, 100, 130, 35, text='Dialog Lines')
         self.dialog_options = GuiContainer([Button(0, 0, 35, 35, text='+', image_normal=img, callback=self.add_dialog),
-                                            Button(0, 0, 35, 35, text='-', image_normal=img, callback=self.sub_dialog)])
+                                            Button(0, 0, 35, 35, text='-', image_normal=img, callback=self.sub_dialog)], care_size=False)
         self.dialog_options.set_rect(0, 0, 100, 35)
 
         self.pokemon_info_text = GuiContainer([Button(0, 0, 100, 35, text='Poke-Name'),
-                                               Button(0, 0, 50, 35, text='Lvl')])
+                                               Button(0, 0, 50, 35, text='Lvl')], care_size=False)
         self.pokemon_info_text.set_rect(0, 0, 200, 35)
         self.pokemon_options = GuiContainer([Button(0, 0, 35, 35, text='+', image_normal=img, callback=self.add_pokemon),
-                                             Button(0, 0, 35, 35, text='-', image_normal=img, callback=self.sub_pokemon)])
+                                             Button(0, 0, 35, 35, text='-', image_normal=img, callback=self.sub_pokemon)], care_size=False)
         self.pokemon_options.set_rect(0, 0, 100, 35)
 
         self.dialog_textfields = []
@@ -56,6 +56,9 @@ class NpcGui:
         self.clicked_npc(self.npc_editor.npc['i'])
         self.gen_dialog_cont()
         self.gen_pokemon_cont()
+
+    def exit(self):
+        pass
 
     def add_dialog(self):
         if self.npc_editor.npc is not None:
@@ -85,7 +88,7 @@ class NpcGui:
                                                         change=lambda x=i: self.change_dialog(x)))
 
         self.dialog_cont = GuiContainer(self.dialog_textfields + [self.dialog_options],
-                                        with_columns=False, horizontal=False)
+                                        with_columns=False, horizontal=False, care_size=False)
 
     def resize_dialog_textfields(self, w, h):
         for tf in self.dialog_textfields:
@@ -119,12 +122,12 @@ class NpcGui:
                 g = GuiContainer([
                     TextField(0, 0, 100, 35, text=pokemon[i]['name'], change=lambda x=i: self.change_pokemon(x)),
                     TextField(0, 0, 40, 35, text=pokemon[i]['lvl'], change=lambda x=i: self.change_pokemon(x))
-                ])
+                ], care_size=False)
                 g.set_rect(0, 0, 220, 35)
                 self.pokemon_textfields.append(g)
 
         self.pokemon_cont = GuiContainer(self.pokemon_textfields + [self.pokemon_options],
-                                         with_columns=False, horizontal=False)
+                                         with_columns=False, horizontal=False, care_size=False)
 
     def rebuild_scene(self, width, height):
         self.last_width = width
@@ -139,6 +142,11 @@ class NpcGui:
     def handle_event(self, event):
         if event.type == pygame.VIDEORESIZE:
             self.rebuild_scene(event.w, event.h)
+
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            if self.npc_cont.handle_scroll(event):
+                pass
+
         self.back_button.handle_event(event)
         self.save_button.handle_event(event)
         self.npc_cont.handle_event(event)

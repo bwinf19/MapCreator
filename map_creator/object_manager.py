@@ -20,7 +20,8 @@ class ObjectManager:
 class Object:
     def __init__(self, folder, filename):
         self.name = filename
-        self.image = pygame.image.load(os.path.join(folder, filename, "image.png"))
+        self.path = os.path.join(folder, filename)
+        self.image = pygame.image.load(os.path.join(self.path, "image.png"))
         self.image_down = self.image.copy()
         pygame.draw.rect(self.image_down, (255, 0, 0), (0, 0, self.image.get_width() - 1, self.image.get_height() - 1),
                          1)

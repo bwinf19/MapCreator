@@ -59,6 +59,10 @@ class MapGui:
                 node.set_text(self.object_manager.objects[i].name, True, fit_rect=True, alpha=128)
             i += 1
 
+    def load_object(self, x):
+        if x >= 0:
+            self.map_manager.gm.load_object(x)
+
     def __init__(self, tm, om, trm, mm):
         self.tile_manager = tm
         self.object_manager = om
@@ -91,12 +95,19 @@ class MapGui:
         self.tiles_cont = ObjectGuiContainer(self.tile_manager.tiles,
                                              (MapGui.TILE_SIZE, MapGui.TILE_SIZE), self.clicked_tile)
 
-        self.npc_cont = ObjectGuiContainer(self.npc_manager.npcs,
-                                           (MapGui.TRAINERS_SIZE, MapGui.TRAINERS_SIZE),
-                                           self.clicked_npc, extras=[ICON_ERASER, ICON_CURSOR, ICON_ROT_LEFT, ICON_ROT_RIGHT])
+        self.npc_cont = ObjectGuiContainer(self.npc_manager.npcs, (MapGui.TRAINERS_SIZE, MapGui.TRAINERS_SIZE),
+                                           self.clicked_npc,
+                                           extras=[ICON_ERASER, ICON_CURSOR, ICON_ROT_LEFT, ICON_ROT_RIGHT])
 
-        self.objects_cont = ObjectGuiContainer(self.object_manager.objects,
-                                               (MapGui.OBJECTS_SIZE, MapGui.OBJECTS_SIZE), self.clicked_object)
+        self.objects_cont = ObjectGuiContainer(self.object_manager.objects, (MapGui.OBJECTS_SIZE, MapGui.OBJECTS_SIZE),
+                                               self.clicked_object, callback_left=self.load_object)
+
+    def entry(self):
+        pass
+
+    def exit(self):
+        self.mouse_down = False
+        self.scroll_pos = None
 
     def add_pen_size(self):
         self.pen_size += 1

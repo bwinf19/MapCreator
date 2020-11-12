@@ -7,6 +7,7 @@ pygame.init()
 
 from mapgui import MapGui
 from npcgui import NpcGui
+from objectgui import ObjectGui
 from map_manager import MapManager
 from object_manager import ObjectManager
 from tile_manager import TileManager
@@ -40,24 +41,35 @@ class GuiManager:
 
         mm = MapManager(PATH, os.path.join(path, "objects"), tm, om, trm, self)
         self.mg = MapGui(tm, om, trm, mm)
-        self.mg.rebuild_scene(self.screen.get_width(), self.screen.get_height())
         self.npce = NpcEditor()
         self.ng = NpcGui(self.npce, trm, self)
-        self.ng.rebuild_scene(self.screen.get_width(), self.screen.get_height())
+        self.og = ObjectGui(self, om)
 
-        self.currg = self.mg
+        self.currg = None
+        self.load(self.mg)
+
+    def load(self, gui):
+        if self.currg is not None:
+            self.currg.exit()
+        self.currg = gui
+        self.currg.entry()
+        self.currg.rebuild_scene(self.screen.get_width(), self.screen.get_height())
+
+    def load_object(self, x):
+        self.og.set_object(x)
+        self.load(self.og)
 
     def load_npc(self, pos, npc):
         self.npce.set_npc(pos, npc)
-        self.ng.entry()
-        self.ng.rebuild_scene(self.screen.get_width(), self.screen.get_height())
-        self.currg = self.ng
+        self.load(self.ng)
+
+    def load_map(self):
+        self.load(self.mg)
 
     def save_npc_and_load(self, pos, npc):
         self.mg.map_manager.current_map.change_npc(pos, npc)
         self.mg.map_manager.save()
-        self.mg.rebuild_scene(self.screen.get_width(), self.screen.get_height())
-        self.currg = self.mg
+        self.load_map()
 
     def start(self):
         running = True
