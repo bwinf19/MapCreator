@@ -123,10 +123,10 @@ class ObjectGui:
 
         self.trigger_textfield = TextField(340, 40, 150, 30, text=self.name, change=self.update)
 
-        self.set_collision_button = Button(0, 120, 200, 30, text='Set collision box',
+        self.set_collision_button = Button(0, 120, 200, 30, text='Edit collision box',
                                            image_normal=IMAGE_GRAY, callback=self.set_collision_box)
 
-        self.set_trigger_box_button = Button(0, 160, 200, 30, text='Set trigger box',
+        self.set_trigger_box_button = Button(0, 160, 200, 30, text='Edit trigger box',
                                              image_normal=IMAGE_GRAY, callback=self.set_trigger_box)
 
         self.remove_collision_button = Button(0, 200, 200, 30, text='Remove collision box',
@@ -161,6 +161,7 @@ class ObjectGui:
         if not is_valid_rect(self.data['collision_box']):
             size = self.object.image.get_size()
             self.data['collision_box'] = 0, 0, size[0], size[1]
+            self.update()
 
     def set_trigger_box(self):
         self.setting_collision_box = False
@@ -168,6 +169,7 @@ class ObjectGui:
         if not is_valid_rect(self.data['trigger_box']):
             size = self.object.image.get_size()
             self.data['trigger_box'] = 0, 0, size[0], size[1]
+            self.update()
 
     def remove_collision_box(self):
         self.data['collision_box'] = 0, 0, 0, 0
