@@ -212,9 +212,11 @@ class TextField:
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.rect.collidepoint(event.pos):
-                self.active = True
+                if event.button == 1:
+                    self.active = True
             else:
-                self.active = False
+                if event.button == 1 or event.button == 3:
+                    self.active = False
             self.color = TextField.COLOR_ACTIVE if self.active else TextField.COLOR_INACTIVE
         if event.type == pygame.KEYDOWN:
             if self.active:

@@ -85,7 +85,7 @@ class NpcGui:
                                                         change=lambda x=i: self.change_dialog(x)))
 
         self.dialog_cont = GuiContainer(self.dialog_textfields + [self.dialog_options],
-                                        with_columns=False, horizontal=False, care_size=False)
+                                        with_columns=False, horizontal=False, care_size=True)
 
     def resize_dialog_textfields(self, w, h):
         for tf in self.dialog_textfields:
@@ -124,7 +124,7 @@ class NpcGui:
                 self.pokemon_textfields.append(g)
 
         self.pokemon_cont = GuiContainer(self.pokemon_textfields + [self.pokemon_options],
-                                         with_columns=False, horizontal=False, care_size=False)
+                                         with_columns=False, horizontal=False, care_size=True)
 
     def rebuild_scene(self, width, height):
         self.last_width = width
@@ -132,9 +132,9 @@ class NpcGui:
         self.bg.set_rect(0, 0, width, height)
         self.npc_cont.set_rect(120, 0, width, 100)
         self.resize_dialog_textfields(width - 250, 35)
-        self.dialog_cont.set_rect(0, 150, width - 250, 200)
+        self.dialog_cont.set_rect(0, 150, width - 250, height)
         self.pokemon_info_text.move(width - 220, 100)
-        self.pokemon_cont.set_rect(width - 220, 150, width, 200)
+        self.pokemon_cont.set_rect(width - 220, 150, width, height)
 
     def handle_event(self, event):
         if event.type == pygame.VIDEORESIZE:
@@ -143,12 +143,20 @@ class NpcGui:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if self.npc_cont.handle_scroll(event):
                 pass
+            elif self.dialog_cont.handle_scroll(event):
+                pass
+            elif self.pokemon_cont.handle_scroll(event):
+                pass
 
         self.back_button.handle_event(event)
         self.save_button.handle_event(event)
         self.npc_cont.handle_event(event)
-        self.dialog_cont.handle_event(event)
-        self.pokemon_cont.handle_event(event)
+        self.dialog_options.handle_event(event)
+        for tf in self.dialog_textfields:
+            tf.handle_event(event)
+        self.pokemon_options.handle_event(event)
+        for tf in self.pokemon_textfields:
+            tf.handle_event(event)
 
     def render(self, screen):
         self.bg.draw(screen)
