@@ -324,9 +324,10 @@ class GuiContainer:
         self.rebuild()
 
     def handle_scroll(self, event):
+        if event.type != pygame.MOUSEBUTTONDOWN:
+            return False
         if not self.hits(event.pos):
             return False
-
         if event.button == 4:
             if self.scroll_offset < self.min_scroll:
                 self.scroll_offset += 10
