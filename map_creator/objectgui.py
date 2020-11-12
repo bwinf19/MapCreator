@@ -1,6 +1,6 @@
 import pygame
 
-from gui_tools import Button, GuiContainer, TextField, ObjectGuiContainer
+from gui_tools import Button, GuiContainer, TextField, ObjectGuiContainer, IMAGE_GRAY
 
 import os
 import json
@@ -14,24 +14,23 @@ class ObjectGui:
 
         self.object_manager = om
 
+        self.object_index = None
         self.object = None
         self.name = 'ERROR! PLS ASK'
         self.data = None
-
-        img = pygame.Surface((100, 100))
-        img.fill((150, 150, 150))
+        self.config = None
 
         self.bg = ObjectGuiContainer([], (32, 64), extras=[])
 
-        self.back_button = Button(0, 0, 120, 30, text="Back", image_normal=img,
+        self.back_button = Button(0, 0, 120, 30, text="Back", image_normal=IMAGE_GRAY,
                                   callback=self.gm.load_map)
 
-        self.save_button = Button(0, 40, 120, 30, text="Save", image_normal=img,
+        self.save_button = Button(0, 40, 120, 30, text="Save", image_normal=IMAGE_GRAY,
                                   callback=lambda: None)
 
         self.name_text = Button(140, 0, 180, 30, text=self.name)
 
-        self.create_config_button = Button(140, 40, 500, 30, text=self.name, image_normal=img)
+        self.create_config_button = Button(140, 40, 1, 30, text=self.name)
 
         self.rebuild_scene(self.last_width, self.last_height)
 
@@ -42,17 +41,31 @@ class ObjectGui:
         pass
 
     def set_object(self, x):
-        self.object = self.object_manager.objects[x]
+        self.object_index = x
+        self.object = self.object_manager.objects[self.object_index]
         self.name = self.object.name
-        self.name_text.set_text('Name: ' + self.name, True, fit_rect=True)
-        config = os.path.join(self.object.path, 'config.json')
 
-        if os.path.isfile(config):
-            line = open(config, "r").readline()
+        self.name_text = Button(140, 0, 180, 30, text="Name: "+self.name, fit_text=True)
+
+        self.config = os.path.join(self.object.path, 'config.json')
+
+        if os.path.isfile(self.config):
+            line = open(self.config, "r").readline()
             self.data = json.loads(line)
         else:
             self.data = None
-            self.create_config_button.set_text('Create config.json for '+self.name, True)
+            self.create_config_button = Button(140, 40, 1, 30, text='Create config.json for '+self.name,
+                                               image_normal=IMAGE_GRAY, fit_text=True, callback=self.create_json)
+
+    def create_json(self):
+        self.save_json({'collision': False})
+        self.set_object(self.object_index)
+
+    def save_json(self, data):
+        open(self.config, "w").write(json.dumps({
+            'collision': str(data['collision']).lower(),
+        }))
+        print("saved")
 
     def rebuild_scene(self, width, height):
         self.bg.set_rect(0, 0, width, height)
