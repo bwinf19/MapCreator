@@ -72,11 +72,11 @@ class MapGui:
         buttons = []
         for ma in self.map_manager.maps.keys():
             if ma == self.map_manager.current_name:
-                buttons.append(Button(0, 0, 100, 30, text=str(ma), image_normal=IMAGE_DOWN))
+                buttons.append(Button(0, 0, 100, 30, text=str(ma), image_normal=IMAGE_DOWN, fit_text=True))
             else:
                 buttons.append(Button(0, 0, 100, 30, text=str(ma),
                                       callback=lambda x=ma: (self.map_manager.select_map(x), self.entry()),
-                                      image_normal=IMAGE_GRAY))
+                                      image_normal=IMAGE_GRAY, fit_text=True))
 
         self.buttons_cont_top = GuiContainer(buttons, horizontal=True, with_columns=False)
 
