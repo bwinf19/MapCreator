@@ -127,6 +127,7 @@ class MapGui:
         self.refresh()
         if self.last_width is not None:
             self.rebuild_scene(self.last_width, self.last_height)
+        self.map_manager.set_current_map()
 
     def exit(self):
         self.mouse_down = False

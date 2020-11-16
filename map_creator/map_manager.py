@@ -28,8 +28,11 @@ class MapManager:
         if self.current_map is not None:
             self.current_map.save()
 
+    def set_current_map(self):
+        selected_map = self.maps[self.current_name]
+        self.current_map = Map(self.tm, self.om, self.trm, self, selected_map)
+
     def select_map(self, name):
         self.save()
         self.current_name = name
-        selected_map = self.maps[name]
-        self.current_map = Map(self.tm, self.om, self.trm, self, selected_map)
+        self.set_current_map()
