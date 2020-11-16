@@ -345,11 +345,13 @@ class GuiContainer:
             return False
         if event.button == 4:
             if self.scroll_offset < self.min_scroll:
-                self.scroll_offset += 10
+                off = (self.get_width()/500) if self.horizontal else (self.get_height()/500)
+                self.scroll_offset += 20 * off
                 self.rebuild()
         elif event.button == 5:
             if self.scroll_offset > -self.max_scroll:
-                self.scroll_offset -= 10
+                off = (self.get_width() / 500) if self.horizontal else (self.get_height() / 500)
+                self.scroll_offset -= 20 * off
                 self.rebuild()
         return True
 
