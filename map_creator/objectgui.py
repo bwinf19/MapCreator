@@ -318,7 +318,7 @@ class ObjectGui:
 
     def create_json(self):
         self.save_json({'collision': False})
-        self.set_object(self.object_index)
+        self.gm.load_object(self.object_index)
 
     def save_json(self, data):
         open(self.config_path, "w").write(json.dumps(get_json(data)))

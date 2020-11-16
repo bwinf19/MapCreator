@@ -37,6 +37,7 @@ class GuiManager:
 
         tm = TileManager(os.path.join(path, "tiles"))
         om = ObjectManager(os.path.join(path, "objects"))
+        self.om = om
         trm = NpcManager(os.path.join(path, "skins"))
 
         mm = MapManager(PATH, os.path.join(path, "objects"), tm, om, trm, self)
@@ -56,6 +57,7 @@ class GuiManager:
         self.currg.rebuild_scene(self.screen.get_width(), self.screen.get_height())
 
     def load_object(self, x):
+        self.og = ObjectGui(self, self.om)
         self.og.set_object(x)
         self.load(self.og)
 
