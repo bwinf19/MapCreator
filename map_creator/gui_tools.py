@@ -1,6 +1,11 @@
 import pygame
 
-import pyperclip
+try:
+    import pyperclip
+    CAN_COPY = True
+except ModuleNotFoundError:
+    print("You have no pyperclip installed, so you can not do copy and paste")
+    CAN_COPY = False
 
 DEFAULT_SIZE = (100, 100)
 FONT = pygame.font.SysFont('calibre', 24)
@@ -224,9 +229,9 @@ class TextField:
                     if event.key == pygame.K_x:
                         self.text = ''
                         self.change()
-                    elif event.key == pygame.K_c:
+                    elif CAN_COPY and event.key == pygame.K_c:
                         pyperclip.copy(self.text)
-                    elif event.key == pygame.K_v:
+                    elif CAN_COPY and event.key == pygame.K_v:
                         self.text = pyperclip.paste()
                         self.change()
                 elif event.key == pygame.K_RETURN:

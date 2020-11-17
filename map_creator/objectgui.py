@@ -8,6 +8,14 @@ import os
 import json
 
 
+def is_int(s):
+    try:
+        int(s)
+        return True
+    except:
+        return False
+
+
 def load_rect(rect):
     return [
         int(rect['x']),
@@ -33,6 +41,22 @@ def offset_rect(rect, off):
         rect[2],
         rect[3]
     ]
+
+
+def griddify(i, size):
+    return int(int(i / int(size)) * int(size))
+
+
+def lock_rect(rect, size='1'):
+    if is_int(size):
+        return [
+            griddify(rect[0], size),
+            griddify(rect[1], size),
+            griddify(rect[2], size),
+            griddify(rect[3], size)
+        ]
+    else:
+        return rect
 
 
 def is_valid_rect(rect):
@@ -74,15 +98,21 @@ def resize_rect(rect, pos, size):
     return t
 
 
-def get_json(data):
+def get_json(data, tile_size='1'):
     save_data = {'collision': str(data['collision']).lower()}
     if 'collision_box' in data and is_valid_rect(data['collision_box']):
-        save_data['collision_box'] = save_rect(data['collision_box'])
+        save_data['collision_box'] = save_rect(lock_rect(data['collision_box'], tile_size))
     if 'trigger_box' in data and is_valid_rect(data['trigger_box']):
-        save_data['trigger_box'] = save_rect(data['trigger_box'])
+        save_data['trigger_box'] = save_rect(lock_rect(data['trigger_box'], tile_size))
     if 'triggers' in data and data['triggers'] != '':
         save_data['triggers'] = data['triggers']
     return save_data
+
+
+def cropped_img(img, rect):
+    cropped = pygame.Surface((rect[2], rect[3]), pygame.SRCALPHA)
+    cropped.blit(img, (0, 0), (rect[0], rect[1], rect[2], rect[3]))
+    return cropped
 
 
 class ObjectGui:
@@ -94,6 +124,8 @@ class ObjectGui:
         self.gm = gm
 
         self.object_manager = om
+
+        self.tile_size = self.gm.get_config("TILE_SIZE")
 
         self.object_index = None
         self.object = None
@@ -121,6 +153,10 @@ class ObjectGui:
 
         self.collision_toggle_button = Button(140, 40, 100, 30,
                                               text=self.name, image_normal=IMAGE_GRAY, callback=self.toggle_collision)
+
+        self.tile_size_info_text = Button(300, 0, 100, 30, text='Tile Size:')
+
+        self.tile_size_textfield = TextField(390, 0, 50, 30, text=self.tile_size, change=self.update_tile_size)
 
         self.trigger_info_text = Button(240, 40, 100, 30, text='Trigger:')
 
@@ -150,6 +186,9 @@ class ObjectGui:
         self.remove_inner_world_button = Button(0, 0, 200, 30, text='Remove inner world',
                                                 image_normal=IMAGE_GRAY, callback=self.remove_inner_world)
 
+        crop_object_image_button = Button(0, 0, 200, 30, text='Crop to collision',
+                                          image_normal=IMAGE_GRAY, callback=self.crop_image)
+
         self.edit_buttons = GuiContainer([self.edit_collision_button,
                                           self.edit_trigger_box_button,
                                           self.remove_collision_button,
@@ -158,6 +197,7 @@ class ObjectGui:
                                           clone_object_button,
                                           self.create_inner_world_button,
                                           self.remove_inner_world_button,
+                                          crop_object_image_button
                                           ],
                                          care_size=True,
                                          with_columns=False,
@@ -178,6 +218,9 @@ class ObjectGui:
             return 'Collision On'
         else:
             return 'Collision Off'
+
+    def update_tile_size(self):
+        self.tile_size = self.tile_size_textfield.text
 
     def toggle_collision(self):
         self.data['collision'] = not self.data['collision']
@@ -215,6 +258,13 @@ class ObjectGui:
             if os.path.exists(os.path.join(self.object.path, p)):
                 shutil.copyfile(os.path.join(self.object.path, p), os.path.join(np, p))
         self.gm.load_map()
+
+    def crop_image(self):
+        if is_valid_rect(self.data['collision_box']):
+            image_rect = self.object.image.get_rect()
+            pygame.image.save(cropped_img(self.object.image, lock_rect(offset_rect(self.data['collision_box'], image_rect), self.tile_size)),
+                              self.object.image_path)
+            self.object.load_image()
 
     def set_collision_box(self):
         self.setting_collision_box = True
@@ -256,7 +306,7 @@ class ObjectGui:
         if self.data is not None:
             self.data['triggers'] = self.trigger_textfield.text
             self.collision_toggle_button.set_text(self.collision_text(), True)
-            self.json_info_text.set_text(str(get_json(self.data)))
+            self.json_info_text.set_text(str(get_json(self.data, self.tile_size)))
             self.rebuild_scene(self.last_width, self.last_height)
 
     def save(self):
@@ -321,7 +371,7 @@ class ObjectGui:
         self.gm.load_object(self.object_index)
 
     def save_json(self, data):
-        open(self.config_path, "w").write(json.dumps(get_json(data)))
+        open(self.config_path, "w").write(json.dumps(get_json(data, self.tile_size)))
         print("saved")
 
     def rebuild_scene(self, width, height):
@@ -329,7 +379,8 @@ class ObjectGui:
         self.last_height = height
         self.bg.set_rect(0, 0, width, height)
         if self.data is not None:
-            self.json_info_text = Button(0, height - 30, 1, 30, text=str(get_json(self.data)), fit_text=True)
+            self.json_info_text = Button(0, height - 30, 1, 30,
+                                         text=str(get_json(self.data, self.tile_size)), fit_text=True)
             self.edit_buttons.set_rect(0, 120, 220, height - 30)
 
     def handle_resize_box(self, pos, buffer=30):
@@ -363,6 +414,7 @@ class ObjectGui:
                     self.mouse_down = False
             self.collision_toggle_button.handle_event(event)
             self.trigger_textfield.handle_event(event)
+            self.tile_size_textfield.handle_event(event)
 
             self.edit_buttons.handle_scroll(event)
             self.edit_buttons.handle_event(event)
@@ -376,15 +428,23 @@ class ObjectGui:
         self.save_button.draw(screen)
         self.back_button.draw(screen)
         self.name_text.draw(screen)
-        self.trigger_info_text.draw(screen)
         if self.data is None:
             self.create_config_button.draw(screen)
         else:
+            self.trigger_info_text.draw(screen)
+            self.tile_size_info_text.draw(screen)
             self.json_info_text.draw(screen)
             self.collision_toggle_button.draw(screen)
             self.trigger_textfield.draw(screen)
+            self.tile_size_textfield.draw(screen)
             self.edit_buttons.draw(screen)
             if is_valid_rect(self.data['collision_box']):
-                pygame.draw.rect(screen, (255, 0, 0), offset_rect(self.data['collision_box'], image_rect), 3)
+                pygame.draw.rect(screen,
+                                 (255, 0, 0),
+                                 offset_rect(lock_rect(self.data['collision_box'], self.tile_size),
+                                             image_rect), 3)
             if is_valid_rect(self.data['trigger_box']):
-                pygame.draw.rect(screen, (0, 255, 0), offset_rect(self.data['trigger_box'], image_rect), 3)
+                pygame.draw.rect(screen,
+                                 (0, 255, 0),
+                                 offset_rect(lock_rect(self.data['trigger_box'], self.tile_size),
+                                             image_rect), 3)

@@ -26,7 +26,14 @@ class Object:
     def __init__(self, folder, filename):
         self.name = filename
         self.path = os.path.join(folder, filename)
-        self.image = pygame.image.load(os.path.join(self.path, "image.png"))
+        self.image_path = os.path.join(self.path, "image.png")
+        self.image = None
+        self.image_down = None
+        self.image_hover = None
+        self.load_image()
+
+    def load_image(self):
+        self.image = pygame.image.load(self.image_path)
         self.image_down = self.image.copy()
         pygame.draw.rect(self.image_down, (255, 0, 0), (0, 0, self.image.get_width() - 1, self.image.get_height() - 1),
                          1)
