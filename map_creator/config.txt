@@ -1,1 +1,2 @@
-PATH=F:\PokemonProgProj\Code\gruppe-02-github\Pokemon\src\main\resources
+PATH=F:\PokemonProgProj\Code\gruppe-02\Projekte\Pokemon\src\main\resources
+TILE_SIZE=32
