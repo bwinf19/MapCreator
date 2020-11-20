@@ -23,6 +23,9 @@ class Map:
     temp_object_pos = (0, 0)
     temp_pen_size = 0
 
+    tile_map_copy = None
+    object_map_copy = None
+
     offset_pos = (0, 0)
 
     show_grid = True
@@ -176,10 +179,13 @@ class Map:
             self.npc_map = moved_npcs
 
     def set_tile(self, pos, tile_i, pen_size=1):
+        self._set_tile(self.grid_pos(pos), tile_i, pen_size)
+
+    def _set_tile(self, pos, tile_i, pen_size=1):
         if tile_i is None:
             return
         pen_size_off = pen_size - 1
-        xs, ys = self.grid_pos(pos)
+        xs, ys = pos
 
         self.expand(xs - pen_size_off, ys - pen_size_off)
 
@@ -193,10 +199,14 @@ class Map:
                 self.tile_map[y][x] = tile_i
 
     def set_object(self, pos, object_i, pen_size=1):
+        self._set_object(self.grid_pos(pos), object_i, pen_size)
+
+    def _set_object(self, pos, object_i, pen_size=1):
         if object_i is None:
             return
         pen_size_off = pen_size - 1
-        xs, ys = self.grid_pos(pos)
+
+        xs, ys = pos
 
         self.expand(xs - pen_size_off, ys - pen_size_off)
 
@@ -213,6 +223,8 @@ class Map:
         self.npc_map[pos] = npc
 
     def set_npc(self, pos, npc_i):
+        self.tile_map_copy = None
+        self.object_map_copy = None
         if npc_i is None:
             return
         if npc_i == -4:
@@ -252,6 +264,30 @@ class Map:
 
     def set_spawn_point(self, pos):
         self.spawn_point = self.grid_pos(pos)
+
+    def reset_copy(self):
+        self.tile_map_copy = None
+        self.object_map_copy = None
+
+    def set_copy(self, pos, pen_size):
+        if self.tile_map_copy is None and self.object_map_copy is None:
+            xs, ys = self.grid_pos(pos)
+            tycut = self.tile_map[ys:ys + pen_size]
+            self.tile_map_copy = []
+            for y in tycut:
+                self.tile_map_copy.append(y[xs:xs + pen_size])
+            oycut = self.object_map[ys:ys + pen_size]
+            self.object_map_copy = []
+            for y in oycut:
+                self.object_map_copy.append(y[xs:xs + pen_size])
+        else:
+            xs, ys = self.grid_pos(pos)
+            for yi in range(len(self.tile_map_copy)):
+                for xi in range(len(self.tile_map_copy[yi])):
+                    self._set_tile((xs + xi, ys + yi), self.tile_map_copy[yi][xi], 1)
+            for yi in range(len(self.object_map_copy)):
+                for xi in range(len(self.object_map_copy[yi])):
+                    self._set_object((xs + xi, ys + yi), self.object_map_copy[yi][xi], 1)
 
     def set_object_names(self, drawing_names):
         for obj in self.drawable_objects:

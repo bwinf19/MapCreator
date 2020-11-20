@@ -19,6 +19,8 @@ class MapGui:
 
     setting_spawn_point = False
 
+    copying = False
+
     def deselect_all(self):
         self.tiles_cont.deselect_all()
         self.npc_cont.deselect_all()
@@ -28,16 +30,19 @@ class MapGui:
         self.object_manager.selected_object = None
 
     def clicked_tile(self, x):
+        self.stop_copy()
         self.deselect_all()
         self.tiles_cont.select(x)
         self.tile_manager.selected_tile = x
 
     def clicked_object(self, x):
+        self.stop_copy()
         self.deselect_all()
         self.objects_cont.select(x)
         self.object_manager.selected_object = x
 
     def clicked_npc(self, x):
+        self.stop_copy()
         self.deselect_all()
         self.npc_cont.select(x)
         self.npc_manager.selected_npc = x
@@ -102,6 +107,8 @@ class MapGui:
         self.pen_size_text = Button(0, 0, 120, 30, text="Pen Size: " + str(self.pen_size),
                                     image_hover=IMAGE_NORMAL, image_down=IMAGE_NORMAL)
 
+        self.copy_button = Button(0, 0, 80, 30, text="Copy", callback=self.set_copy, image_normal=IMAGE_GRAY)
+
         self.buttons_cont_top = None
 
         self.buttons_cont_bot = GuiContainer([
@@ -111,7 +118,8 @@ class MapGui:
             Button(0, 0, 80, 30, text="Names", callback=self.toggle_names, image_normal=IMAGE_GRAY),
             self.pen_size_text,
             Button(0, 0, 35, 30, text="+", callback=self.add_pen_size, image_normal=IMAGE_GRAY),
-            Button(0, 0, 35, 30, text="-", callback=self.sub_pen_size, image_normal=IMAGE_GRAY)
+            Button(0, 0, 35, 30, text="-", callback=self.sub_pen_size, image_normal=IMAGE_GRAY),
+            self.copy_button
         ], horizontal=True, with_columns=False)
 
         self.tiles_cont = ObjectGuiContainer(self.tile_manager.tiles,
@@ -131,6 +139,7 @@ class MapGui:
         self.map_manager.set_current_map()
 
     def exit(self):
+        self.map_manager.save()
         self.mouse_down = False
         self.scroll_pos = None
         self.deselect_all()
@@ -143,6 +152,21 @@ class MapGui:
         if self.pen_size > 1:
             self.pen_size -= 1
             self.pen_size_text.set_text("Pen Size: " + str(self.pen_size), True)
+
+    def set_copy(self):
+        if not self.copying:
+            self.deselect_all()
+            self.copying = True
+            self.copy_button.set_text('Copying')
+            self.copy_button.image_normal = self.copy_button.image_hover
+        else:
+            self.stop_copy()
+
+    def stop_copy(self):
+        self.copying = False
+        self.map_manager.current_map.reset_copy()
+        self.copy_button.image_normal = self.copy_button.image_normal_o
+        self.copy_button.set_text('Copy')
 
     def rebuild_scene(self, width, height):
         self.last_width = width
@@ -194,6 +218,10 @@ class MapGui:
                         self.setting_spawn_point = False
                         self.map_manager.current_map.set_spawn_point((event.pos[0] - self.map_rect[0],
                                                                       event.pos[1] - self.map_rect[1]))
+                    elif self.copying:
+                        self.map_manager.current_map.set_copy((event.pos[0] - self.map_rect[0],
+                                                               event.pos[1] - self.map_rect[1]),
+                                                              self.pen_size)
                     else:
                         self.map_manager.current_map.set_tile((event.pos[0] - self.map_rect[0],
                                                                event.pos[1] - self.map_rect[1]),
@@ -218,20 +246,28 @@ class MapGui:
         elif event.type == pygame.MOUSEMOTION:
             if self.map_rect[0] < event.pos[0] < self.map_rect[2] \
                     and self.map_rect[1] < event.pos[1] < self.map_rect[3]:
-                self.map_manager.current_map.show_temp_object(self.object_manager.selected_object,
-                                                              (event.pos[0] - self.map_rect[0],
+                if not self.copying:
+                    self.map_manager.current_map.show_temp_object(self.object_manager.selected_object,
+                                                                  (event.pos[0] - self.map_rect[0],
+                                                                   event.pos[1] - self.map_rect[1]),
+                                                                  self.pen_size)
+                if self.mouse_down:
+                    if self.copying:
+                        self.map_manager.current_map.set_copy((event.pos[0] - self.map_rect[0],
                                                                event.pos[1] - self.map_rect[1]),
                                                               self.pen_size)
-                if self.mouse_down:
-                    self.map_manager.current_map.set_tile((event.pos[0] - self.map_rect[0],
-                                                           event.pos[1] - self.map_rect[1]),
-                                                          self.tile_manager.selected_tile, self.pen_size)
-                    self.map_manager.current_map.set_object((event.pos[0] - self.map_rect[0],
-                                                             event.pos[1] - self.map_rect[1]),
-                                                            self.object_manager.selected_object)
-                    self.map_manager.current_map.set_npc((event.pos[0] - self.map_rect[0],
-                                                          event.pos[1] - self.map_rect[1]),
-                                                         self.npc_manager.selected_npc)
+                    else:
+                        self.map_manager.current_map.set_tile((event.pos[0] - self.map_rect[0],
+                                                               event.pos[1] - self.map_rect[1]),
+                                                              self.tile_manager.selected_tile,
+                                                              self.pen_size)
+                        self.map_manager.current_map.set_object((event.pos[0] - self.map_rect[0],
+                                                                 event.pos[1] - self.map_rect[1]),
+                                                                self.object_manager.selected_object,
+                                                                self.pen_size)
+                        self.map_manager.current_map.set_npc((event.pos[0] - self.map_rect[0],
+                                                              event.pos[1] - self.map_rect[1]),
+                                                             self.npc_manager.selected_npc)
                 if self.scroll_pos is not None:
                     self.map_manager.current_map.add_offset(self.scroll_pos[0] - event.pos[0],
                                                             self.scroll_pos[1] - event.pos[1])
