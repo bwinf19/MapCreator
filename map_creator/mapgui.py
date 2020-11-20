@@ -1,6 +1,7 @@
 import pygame
 
-from gui_tools import Button, GuiContainer, ObjectGuiContainer, IMAGE_NORMAL, IMAGE_DOWN, IMAGE_GRAY, ICON_ERASER, ICON_CURSOR, ICON_ROT_LEFT, ICON_ROT_RIGHT
+from gui_tools import Button, GuiContainer, ObjectGuiContainer, IMAGE_NORMAL, IMAGE_DOWN, IMAGE_GRAY, ICON_ERASER, \
+    ICON_CURSOR, ICON_ROT_LEFT, ICON_ROT_RIGHT
 
 
 class MapGui:
@@ -199,7 +200,7 @@ class MapGui:
                                                               self.tile_manager.selected_tile, self.pen_size)
                         self.map_manager.current_map.set_object((event.pos[0] - self.map_rect[0],
                                                                  event.pos[1] - self.map_rect[1]),
-                                                                self.object_manager.selected_object)
+                                                                self.object_manager.selected_object, self.pen_size)
                         self.map_manager.current_map.set_npc((event.pos[0] - self.map_rect[0],
                                                               event.pos[1] - self.map_rect[1]),
                                                              self.npc_manager.selected_npc)
@@ -219,7 +220,8 @@ class MapGui:
                     and self.map_rect[1] < event.pos[1] < self.map_rect[3]:
                 self.map_manager.current_map.show_temp_object(self.object_manager.selected_object,
                                                               (event.pos[0] - self.map_rect[0],
-                                                               event.pos[1] - self.map_rect[1]))
+                                                               event.pos[1] - self.map_rect[1]),
+                                                              self.pen_size)
                 if self.mouse_down:
                     self.map_manager.current_map.set_tile((event.pos[0] - self.map_rect[0],
                                                            event.pos[1] - self.map_rect[1]),

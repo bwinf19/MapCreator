@@ -21,6 +21,7 @@ class Map:
 
     temp_object = -1
     temp_object_pos = (0, 0)
+    temp_pen_size = 0
 
     offset_pos = (0, 0)
 
@@ -191,19 +192,22 @@ class Map:
 
                 self.tile_map[y][x] = tile_i
 
-    def set_object(self, pos, object_i):
+    def set_object(self, pos, object_i, pen_size=1):
         if object_i is None:
             return
-        x, y = self.grid_pos(pos)
+        pen_size_off = pen_size - 1
+        xs, ys = self.grid_pos(pos)
 
-        self.expand(x, y)
+        self.expand(xs - pen_size_off, ys - pen_size_off)
 
-        while y > len(self.object_map) - 1:
-            self.object_map.append([])
-        while x > len(self.object_map[y]) - 1:
-            self.object_map[y].append(-1)
+        for x in range(xs - pen_size_off, xs + pen_size_off + 1):
+            for y in range(ys - pen_size_off, ys + pen_size_off + 1):
+                while y > len(self.object_map) - 1:
+                    self.object_map.append([])
+                while x > len(self.object_map[y]) - 1:
+                    self.object_map[y].append(-1)
 
-        self.object_map[y][x] = object_i
+                self.object_map[y][x] = object_i
 
     def change_npc(self, pos, npc):
         self.npc_map[pos] = npc
@@ -253,7 +257,8 @@ class Map:
         for obj in self.drawable_objects:
             obj.set_drawing_name(drawing_names)
 
-    def show_temp_object(self, selected_object, pos=None):
+    def show_temp_object(self, selected_object, pos=None, pen_size=1):
+        self.temp_pen_size = pen_size - 1
         self.temp_object = -1 if selected_object is None else selected_object
         if selected_object != -1:
             self.temp_object_pos = pos
@@ -326,9 +331,12 @@ class Map:
                         npc.draw(screen, self.npc_map[(xa, ya)]['dir'], pos[0], pos[1])
                     if self.temp_object != -1 and (xa, ya) == temp_obj_grid_pos:
                         obj = self.drawable_objects[self.temp_object]
-                        pos = self.ungrid_pos(self.grid_object((x, y), obj.image))
-                        obj.draw(screen, pos[0], pos[1])
-                        drawn_temp_obj = True
+                        gx, gy = self.grid_object((x, y), obj.image)
+                        for xo in range(gx - self.temp_pen_size, gx + self.temp_pen_size + 1):
+                            for yo in range(gy - self.temp_pen_size, gy + self.temp_pen_size + 1):
+                                pos = self.ungrid_pos((xo, yo))
+                                obj.draw(screen, pos[0], pos[1])
+                                drawn_temp_obj = True
                 x += self.zoomed_tile_size
             y += self.zoomed_tile_size
 
