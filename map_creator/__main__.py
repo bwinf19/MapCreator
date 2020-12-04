@@ -62,11 +62,12 @@ class GuiManager:
         else:
             return ""
 
-    def load(self, gui):
+    def load(self, gui, hard=True):
         if self.currg is not None:
             self.currg.exit()
         self.currg = gui
-        self.currg.entry()
+        if hard:
+            self.currg.entry()
         self.currg.rebuild_scene(self.screen.get_width(), self.screen.get_height())
 
     def load_object(self, x):
@@ -84,7 +85,7 @@ class GuiManager:
     def save_npc_and_load(self, pos, npc):
         self.mg.map_manager.current_map.change_npc(pos, npc)
         self.mg.map_manager.save()
-        self.load_map()
+        self.load(self.mg, hard=False)
 
     def start(self):
         running = True
