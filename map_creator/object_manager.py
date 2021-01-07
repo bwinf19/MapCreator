@@ -7,18 +7,21 @@ class ObjectManager:
     def __init__(self, folder):
         self.folder = folder
         self.objects = None
+        self.object_index = None
         self.refresh()
         self.selected_object = None
 
     def refresh(self):
         self.objects = []
+        self.object_index = {}
         for filename in os.listdir(self.folder):
             self.objects.append(Object(self.folder, filename))
+        for i in range(len(self.objects)):
+            self.object_index[self.objects[i].name] = i
 
     def get_index(self, name):
-        for i in range(len(self.objects)):
-            if name == self.objects[i].name:
-                return i
+        if name in self.object_index:
+            return self.object_index[name]
         return -1
 
 
