@@ -59,7 +59,7 @@ class Map:
         self.npc_manager = trm
 
         t = self.map_manager.gm.get_config("TILE_SIZE")
-        if t is not "":
+        if t != "":
             try:
                 self.TILE_SIZE = int(t)
             except:
